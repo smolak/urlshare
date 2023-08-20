@@ -1,6 +1,6 @@
 {
   "name": "docs",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev --port 3001",
@@ -9,17 +9,16 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "next": "^13.4.1",
+    "@urlshare/ui": "*",
+    "next": "^13.4.19",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "ui": "*"
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@types/node": "^17.0.12",
     "@types/react": "^18.0.22",
     "@types/react-dom": "^18.0.7",
-    "eslint-config-custom": "*",
-    "tsconfig": "*",
-    "typescript": "^4.5.3"
+    "@urlshare/eslint-config": "*",
+    "@urlshare/tailwind-config": "*",
+    "@urlshare/tsconfig": "*"
   }
 }
