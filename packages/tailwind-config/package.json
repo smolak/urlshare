@@ -1,0 +1,11 @@
+{
+  "name": "@urlshare/tailwind-config",
+  "version": "0.0.0",
+  "main": "index.js",
+  "devDependencies": {
+    "autoprefixer": "^10.4.15",
+    "postcss": "^8.4.28",
+    "tailwindcss": "^3.3.3",
+    "tailwindcss-animate": "^1.0.6"
+  }
+}
