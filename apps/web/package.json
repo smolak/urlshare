@@ -17,6 +17,7 @@
   "devDependencies": {
     "@types/react": "^18.0.22",
     "@types/react-dom": "^18.0.7",
+    "@urlshare/db": "*",
     "@urlshare/eslint-config": "*",
     "@urlshare/tailwind-config": "*",
     "@urlshare/tsconfig": "*"

@@ -1,0 +1,207 @@
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Account {
+  id                       String   @id
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+  userId                   String
+  type                     String
+  provider                 String
+  providerAccountId        String
+  refresh_token            String?  @db.VarChar(500)
+  access_token             String?  @db.VarChar(500)
+  refresh_token_expires_in Int?
+  expires_at               Int?
+  token_type               String?
+  scope                    String?
+  id_token                 String?  @db.VarChar(250)
+  session_state            String?
+  oauth_token_secret       String?
+  oauth_token              String?  @db.VarChar(250)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id
+  sessionToken String   @unique @db.VarChar(250)
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+enum UrlQueueStatus {
+  NEW // For new entries
+  PROCESSING // For an entry that's being processed, so that it's not processed by more handlers
+  ACCEPTED // URL accepted; such one is added to UserUrl
+  FAILED // Failed attempt, but it's not over yet
+  REJECTED // All attempts failed, not going to be processed anymore
+}
+
+model UrlQueue {
+  id           String         @id
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  // Not unique here to fetch it even if it was potentially added to the Url table
+  // in order to update the data.
+  rawUrl       String         @db.VarChar(2000)
+  rawUrlHash   String         @db.VarChar(40)
+  status       UrlQueueStatus @default(NEW)
+  attemptCount Int            @default(0) @db.UnsignedTinyInt
+  metadata     Json           @default("{}")
+  // User will be notified if something went wrong
+  // also it will be used later to populate the UserUrl table
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+
+  @@index([userId])
+  // This index is specific for parsing the queue
+  @@index([status(sort: Desc), createdAt(sort: Desc), attemptCount(sort: Desc)])
+}
+
+model Url {
+  id        String    @id
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  url       String    @db.VarChar(2000)
+  // Reserved for SHA1 hash - required as 2k long URLs will create too long index keys
+  // ones, that are too long for MySQL engine to even work
+  urlHash   String    @unique @db.Char(40)
+  metadata  Json      @default("{}")
+  users     UserUrl[]
+}
+
+model UserUrl {
+  id              String          @id
+  userProfileData UserProfileData @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  userId          String
+  url             Url             @relation(fields: [urlId], references: [id], onDelete: Cascade)
+  urlId           String
+  likes           Int             @default(0) @db.UnsignedInt
+  feeds           Feed[]
+  feedQueue       FeedQueue?
+  createdAt       DateTime        @default(now())
+
+  @@index([userId])
+  @@index([urlId])
+}
+
+model Feed {
+  id        String   @id
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userUrlId String
+  userUrl   UserUrl  @relation(fields: [userUrlId], references: [id], onDelete: Cascade)
+  liked     Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([userUrlId])
+}
+
+enum FeedQueueStatus {
+  NEW // For new entries
+  SUCCESS // Added to the feed
+  ONGOING // For lots of users following other user and it needs to be done in batches
+  REJECTED // All attempts failed, should alert
+}
+
+model FeedQueue {
+  id                String          @id
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @default(now())
+  status            FeedQueueStatus @default(NEW)
+  attemptCount      Int             @default(0) @db.UnsignedTinyInt
+  lastAddedFollowId BigInt          @default(0)
+  userId            String
+  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userUrlId         String          @unique
+  userUrl           UserUrl         @relation(fields: [userUrlId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userUrlId])
+  @@index([status, lastAddedFollowId, createdAt])
+}
+
+enum UserRole {
+  // This is a newly created user, one that will be asked to set handle and name (and whatever is there to be set)
+  NEW_USER
+  // Once setting up user data for new user, the role will become this, to distinguish one from the other
+  USER
+}
+
+model User {
+  id              String           @id
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  name            String?
+  email           String?          @unique
+  password        String?
+  emailVerified   DateTime?
+  image           String?
+  role            UserRole         @default(NEW_USER)
+  followedBy      Follows[]        @relation("following")
+  following       Follows[]        @relation("follower")
+  accounts        Account[]
+  sessions        Session[]
+  urlsInQueue     UrlQueue[]
+  userProfileData UserProfileData?
+  feedUrls        Feed[]
+  feedsInQueue    FeedQueue[]
+}
+
+model Follows {
+  id          BigInt   @id @default(autoincrement())
+  follower    User     @relation("follower", fields: [followerId], references: [id], onDelete: Cascade)
+  followerId  String
+  following   User     @relation("following", fields: [followingId], references: [id], onDelete: Cascade)
+  followingId String
+  createdAt   DateTime @default(now())
+
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
+}
+
+model UserProfileData {
+  id                 String    @id
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  apiKey             String
+  username           String    @unique @db.Char(20)
+  usernameNormalized String    @unique @db.Char(20)
+  image              String?
+  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId             String    @unique
+  userUrls           UserUrl[]
+  following          Int       @default(0) @db.UnsignedInt
+  followers          Int       @default(0) @db.UnsignedInt
+  likes              Int       @default(0) @db.UnsignedInt
+  liked              BigInt    @default(0) @db.UnsignedBigInt
+  urlsCount          Int       @default(0) @db.UnsignedInt
+
+  @@index([userId])
+  @@index([apiKey])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique @db.VarChar(500)
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
