@@ -14,6 +14,9 @@
     "test": "turbo run test",
     "format": "prettier . --write"
   },
+  "prisma": {
+    "schema": "packages/db/prisma/schema.prisma"
+  },
   "dependencies": {
     "clsx": "^2.0.0"
   },

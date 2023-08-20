@@ -1,0 +1,24 @@
+{
+  "name": "@urlshare/db",
+  "version": "0.0.0",
+  "private":  true,
+  "scripts": {
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:migrate:dev": "prisma migrate dev",
+    "db:push": "prisma db push",
+    "db:seed": "tsx src/seed.ts",
+    "format": "prisma format",
+    "generate": "prisma generate",
+    "postinstall": "prisma generate",
+    "studio": "prisma studio",
+    "lint": "eslint \"prisma/**/*.ts\""
+  },
+  "dependencies": {
+    "@prisma/client": "^5.1.1"
+  },
+  "devDependencies": {
+    "@urlshare/eslint-config": "*",
+    "@urlshare/tsconfig": "*",
+    "prisma": "^5.1.1"
+  }
+}
