@@ -18,7 +18,8 @@
     "schema": "packages/db/prisma/schema.prisma"
   },
   "dependencies": {
-    "clsx": "^2.0.0"
+    "clsx": "^2.0.0",
+    "zod": "^3.22.2"
   },
   "devDependencies": {
     "@turbo/gen": "^1.9.7",
