@@ -1,0 +1,8 @@
+{
+  "name": "@urlshare/logger",
+  "version": "0.0.0",
+  "private": true,
+  "dependencies": {
+    "pino": "^8.15.0"
+  }
+}
