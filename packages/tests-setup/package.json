@@ -2,6 +2,7 @@
   "name": "@urlshare/tests-setup",
   "version": "0.0.0",
   "private": true,
+  "main": "index.ts",
   "scripts": {
     "lint": "eslint \"./**/*.ts*\""
   },
