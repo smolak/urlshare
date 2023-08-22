@@ -1,5 +1,5 @@
 import { prisma } from "@urlshare/db/prisma/client";
-import { Button } from "@urlshare/ui/components/ui/button";
+import { Button } from "@urlshare/ui/design-system/ui/button";
 
 export default function Page(props: any) {
   console.log(props);
