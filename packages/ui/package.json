@@ -1,7 +1,10 @@
 {
   "name": "@urlshare/ui",
   "version": "0.0.0",
-  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "lint": "eslint \"./**/*.ts*\""
+  },
   "dependencies": {
     "@radix-ui/react-slot": "^1.0.2",
     "@urlshare/shared": "*",
