@@ -1,5 +1,5 @@
 {
-  "name": "@urlshare/shared",
+  "name": "@urlshare/account",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -8,6 +8,6 @@
     "coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "nanoid": "^4.0.2"
+    "@urlshare/shared": "*"
   }
 }
