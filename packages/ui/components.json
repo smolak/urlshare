@@ -10,7 +10,7 @@
     "cssVariables": false
   },
   "aliases": {
-    "components": "components",
+    "components": "design-system",
     "utils": "utils"
   }
 }
