@@ -1,6 +1,6 @@
-import { Metadata } from "./types";
-import { twitterMetadataFetchAdapter, isTweetUrl } from "./fetch-adapters/twitter";
 import { defaultMetadataFetchAdapter } from "./fetch-adapters/default";
+import { isTweetUrl, twitterMetadataFetchAdapter } from "./fetch-adapters/twitter";
+import { Metadata } from "./types";
 
 export type FetchMetadata = (url: string) => Promise<Metadata>;
 

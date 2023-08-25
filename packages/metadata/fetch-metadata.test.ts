@@ -1,8 +1,9 @@
 import nock from "nock";
-import { fetchMetadata } from "./fetch-metadata";
 import { afterEach } from "vitest";
+
 import { getTweetId, TWITTER_METADATA_URL } from "./fetch-adapters/twitter";
-import { tweetExampleMetadata } from "../../test/fixtures/tweet-example-metadata";
+import { tweetExampleMetadata } from "./fetch-adapters/twitter/fixtures/tweet-example-metadata";
+import { fetchMetadata } from "./fetch-metadata";
 
 describe("fetchMetadata", () => {
   beforeEach(() => {
