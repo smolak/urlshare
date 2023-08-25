@@ -18,12 +18,12 @@
     "@urlshare/db": "*",
     "@urlshare/shared": "*",
     "@urlshare/tsconfig": "*",
-    "react-hook-form": "^7.45.4",
     "react-icons": "^4.10.1",
     "tailwind-merge": "^1.14.0",
     "zod": "^3.22.2"
   },
   "peerDependencies": {
-    "next": "^13.4.19"
+    "next": "^13.4.19",
+    "react-hook-form": "^7.45.4"
   }
 }
