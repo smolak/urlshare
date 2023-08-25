@@ -1,0 +1,13 @@
+{
+  "name": "@urlshare/session",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "coverage": "vitest run --coverage",
+    "lint": "eslint \"./**/*.ts*\"",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@urlshare/shared": "*"
+  }
+}
