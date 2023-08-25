@@ -1,4 +1,4 @@
-import { UserProfileData } from "@prisma/client";
+import { UserProfileData } from "@urlshare/db/prisma/client";
 import { User } from "lucide-react";
 import { FC } from "react";
 

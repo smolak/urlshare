@@ -1,0 +1,15 @@
+{
+  "name": "@urlshare/rss",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "lint": "eslint \"./**/*.ts*\""
+  },
+  "dependencies": {
+    "@urlshare/db": "*",
+    "@urlshare/metadata": "*"
+  },
+  "peerDependencies": {
+    "next": "^13.4.19"
+  }
+}
