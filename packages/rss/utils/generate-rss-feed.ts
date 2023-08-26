@@ -1,4 +1,4 @@
-import { escapeXml } from "./excape-xml";
+import { escapeXml } from "./escape-xml";
 
 interface RSSItem {
   title: string;

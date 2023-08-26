@@ -1,0 +1,20 @@
+import { Url } from "@urlshare/db/prisma/client";
+import { logger } from "@urlshare/logger";
+import { fetchMetadata } from "@urlshare/metadata/fetch-metadata";
+import { NextApiRequest, NextApiResponse } from "next";
+
+import { processUrlQueueItemHandlerFactory } from "./factory";
+
+export type ProcessUrlQueueItemSuccessResponse = { url: Url };
+export type ProcessUrlQueueItemFailureResponse = { error: string };
+export type ProcessUrlQueueItemResponse = ProcessUrlQueueItemSuccessResponse | ProcessUrlQueueItemFailureResponse;
+
+export type ProcessUrlQueueItemHandler = (
+  req: NextApiRequest,
+  res: NextApiResponse<ProcessUrlQueueItemResponse>
+) => Promise<void>;
+
+export const processUrlQueueItemHandler: ProcessUrlQueueItemHandler = processUrlQueueItemHandlerFactory({
+  fetchMetadata,
+  logger,
+});

@@ -5,3 +5,4 @@ import pino from "pino";
 const level = process.env.LOG_LEVEL || "info";
 
 export const logger = pino({ nestedKey: "payload", browser: { asObject: true }, level });
+export type Logger = typeof logger;
