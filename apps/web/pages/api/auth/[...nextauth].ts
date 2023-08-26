@@ -1,5 +1,4 @@
+import { nextAuthOptions } from "@urlshare/web-app/auth/api/next-auth-options";
 import NextAuth from "next-auth";
-
-import { nextAuthOptions } from "../../../server/auth";
 
 export default NextAuth(nextAuthOptions);

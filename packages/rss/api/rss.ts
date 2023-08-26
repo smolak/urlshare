@@ -21,6 +21,9 @@ type RssItemData = {
   url_metadata: CompressedMetadata;
 };
 
+/**
+ * TODO: have this configured from .env or alike, not hardcoded
+ */
 const BASE_URL = "https://urlshare.me";
 
 export async function generateRss({ username, userId }: RequiredUserData, res: ServerResponse) {
@@ -38,6 +41,7 @@ export async function generateRss({ username, userId }: RequiredUserData, res: S
   const channel = {
     title: createTitle(username),
     link: `${BASE_URL}/${username}`,
+    // TODO: same here
     description: `Links added by ${username} @ urlshare.me`,
     items: rssItems.map((rssItem) => {
       const metadata = decompressMetadata(rssItem.url_metadata);
