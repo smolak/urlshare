@@ -1,5 +1,5 @@
 import { UserProfileDataForm } from "@urlshare/web-app/settings/profile/ui/user-profile-data-form";
-import { SettingsLayout } from "@urlshare/web-app/settings/ui/settings-layout";
+import { SettingsLayout } from "@urlshare/web-app/settings/ui/settings.layout";
 import { useSession } from "next-auth/react";
 
 const SettingsProfile = () => {

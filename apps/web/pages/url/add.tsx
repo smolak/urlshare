@@ -1,4 +1,4 @@
-import { LoggedInUserLayout } from "@urlshare/web-app/ui/logged-in-user-layout";
+import { LoggedInUserLayout } from "@urlshare/web-app/ui/logged-in-user.layout";
 import { AddUrl } from "@urlshare/web-app/url/ui/add-url";
 import Head from "next/head";
 import { SessionProvider } from "next-auth/react";

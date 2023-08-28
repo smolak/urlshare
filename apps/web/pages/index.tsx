@@ -3,7 +3,7 @@ import { buttonVariants } from "@urlshare/ui/design-system/ui/button";
 import { cn } from "@urlshare/ui/utils";
 import { InfiniteUserFeed } from "@urlshare/web-app/feed/ui/user-feed-list/infinite-user-feed";
 import { LoadingIndicator } from "@urlshare/web-app/ui/loading-indicator";
-import { LoggedInUserLayout } from "@urlshare/web-app/ui/logged-in-user-layout";
+import { LoggedInUserLayout } from "@urlshare/web-app/ui/logged-in-user.layout";
 import { AddUrl } from "@urlshare/web-app/url/ui/add-url";
 import Head from "next/head";
 import Link from "next/link";

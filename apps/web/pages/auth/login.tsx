@@ -1,5 +1,5 @@
 import { Button } from "@urlshare/ui/design-system/ui/button";
-import { LoginPageLayout } from "@urlshare/web-app/ui/login-page-layout";
+import { LoginPageLayout } from "@urlshare/web-app/ui/login-page.layout";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { signIn, useSession } from "next-auth/react";
