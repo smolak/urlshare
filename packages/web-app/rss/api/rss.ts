@@ -4,6 +4,8 @@ import { generateRssFeed } from "@urlshare/rss/utils/generate-rss-feed";
 import { ServerResponse } from "http";
 import getConfig from "next/config";
 
+import { WEB_APP_BASE_URL, WEB_APP_DOMAIN } from "../../constants";
+
 const createTitle = (username: UserProfileData["username"]) => {
   if (username.slice(-1) === "s") {
     return `${username}' links`;
@@ -20,11 +22,6 @@ type RssItemData = {
   url_metadata: CompressedMetadata;
 };
 
-/**
- * TODO: have this configured from .env or alike, not hardcoded
- */
-const BASE_URL = "https://urlshare.me";
-
 export async function generateRss({ username, userId }: RequiredUserData, res: ServerResponse) {
   const itemsPerUserChannel = getConfig().serverRuntimeConfig.rss.itemsPerUserChannel;
   const rssItems = await prisma.$queryRaw<ReadonlyArray<RssItemData>>`
@@ -39,9 +36,8 @@ export async function generateRss({ username, userId }: RequiredUserData, res: S
 
   const channel = {
     title: createTitle(username),
-    link: `${BASE_URL}/${username}`,
-    // TODO: same here
-    description: `Links added by ${username} @ urlshare.me`,
+    link: `${WEB_APP_BASE_URL}/${username}`,
+    description: `Links added by ${username} @ ${WEB_APP_DOMAIN}`,
     items: rssItems.map((rssItem) => {
       const metadata = decompressMetadata(rssItem.url_metadata);
 

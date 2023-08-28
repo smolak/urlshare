@@ -118,7 +118,7 @@ describe("processQueueItemHandler", () => {
   });
 
   describe("when metadata contains URL and it differs from the raw URL in url queue item", () => {
-    const url = "https://urlshare.me/about";
+    const url = "https://urlshare.app/about";
     const metadata = createExampleWebsiteMetadata({ url });
     const urlQueueEntry = createUrlQueueItem({ rawUrl: url + "#faq" });
 
@@ -159,7 +159,7 @@ describe("processQueueItemHandler", () => {
     });
 
     describe("when the url in metadata differs from the raw one, from queue (e.g. canonical URL is different)", () => {
-      const url = "https://urlshare.me/about";
+      const url = "https://urlshare.app/about";
       const metadata = createExampleWebsiteMetadata({ url });
       const urlQueueEntry = createUrlQueueItem({ rawUrl: url + "#faq" });
 
@@ -232,7 +232,7 @@ describe("processQueueItemHandler", () => {
     });
 
     describe("when the url in metadata is the same as the raw one, from queue", () => {
-      const url = "https://urlshare.me/about";
+      const url = "https://urlshare.app/about";
       const metadata = createExampleWebsiteMetadata({ url });
       const urlQueueEntry = createUrlQueueItem({ rawUrl: url });
 

@@ -3,6 +3,8 @@ import { Link2, LucideProps } from "lucide-react";
 import Link from "next/link";
 import { FC, RefAttributes } from "react";
 
+import { WEB_APP_DOMAIN } from "../constants";
+
 type LogoProps = {
   withName?: boolean;
   asLink?: boolean;
@@ -18,7 +20,7 @@ const LogoContent = ({ withName }: LogoContentProps) => {
   return (
     <>
       <LogoIcon strokeWidth={2.25} size={25} />
-      {withName && <span className="hidden font-bold sm:inline-block">urlshare.me</span>}
+      {withName && <span className="hidden font-bold sm:inline-block">{WEB_APP_DOMAIN}</span>}
     </>
   );
 };

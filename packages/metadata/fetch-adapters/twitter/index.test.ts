@@ -17,7 +17,7 @@ describe("isTweetUrl", () => {
         expectedResult: false,
       },
       notTwitterAtAll: {
-        url: "https://urlshare.me",
+        url: "https://urlshare.app",
         expectedResult: false,
       },
     });

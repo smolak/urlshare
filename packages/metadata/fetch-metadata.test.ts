@@ -32,7 +32,7 @@ describe("fetchMetadata", () => {
   });
 
   describe("when the url is pointing to anything else", () => {
-    const otherUrl = "https://urlshare.me/whatever";
+    const otherUrl = "https://urlshare.app/whatever";
 
     it("should use default fetch adapter", async () => {
       const url = new URL(otherUrl);

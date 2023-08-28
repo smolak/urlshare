@@ -12,6 +12,7 @@ import { Calendar, Image as ImageIcon } from "lucide-react";
 import Link from "next/link";
 import { FC, ReactNode } from "react";
 
+import { WEB_APP_DOMAIN } from "../../../constants";
 import { LogoIcon } from "../../../ui/logo";
 import { UserImage } from "../../../user/ui/user-image";
 import { FeedVM } from "../../models/feed.vm";
@@ -39,7 +40,7 @@ export const FeedListItem: FC<FeedListItemProps> = ({ feedItem, interactions }) 
             </Avatar>
           )}
           {isSomethingElse && (
-            <LogoIcon strokeWidth={1} size={40} className="text-slate-400" aria-label="Urlshare.me logo icon" />
+            <LogoIcon strokeWidth={1} size={40} className="text-slate-400" aria-label={`${WEB_APP_DOMAIN} logo icon`} />
           )}
           <a
             href={url.url}
