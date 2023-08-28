@@ -1,9 +1,8 @@
 import { Feed, prisma, Url, UserProfileData, UserUrl } from "@urlshare/db/prisma/client";
 import { CompressedMetadata, decompressMetadata } from "@urlshare/metadata/compression";
+import { generateRssFeed } from "@urlshare/rss/utils/generate-rss-feed";
 import { ServerResponse } from "http";
 import getConfig from "next/config";
-
-import { generateRssFeed } from "../utils/generate-rss-feed";
 
 const createTitle = (username: UserProfileData["username"]) => {
   if (username.slice(-1) === "s") {

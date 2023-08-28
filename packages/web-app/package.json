@@ -10,6 +10,7 @@
   "dependencies": {
     "@urlshare/auth": "*",
     "@urlshare/logger": "*",
+    "@urlshare/rss": "*",
     "@urlshare/shared": "*",
     "@urlshare/trpc": "*",
     "@urlshare/ui": "*",

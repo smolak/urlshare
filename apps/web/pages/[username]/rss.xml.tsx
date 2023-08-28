@@ -1,5 +1,5 @@
 import { prisma } from "@urlshare/db/prisma/client";
-import { generateRss } from "@urlshare/rss/api/rss";
+import { generateRss } from "@urlshare/web-app/rss/api/rss";
 import { usernameSchema } from "@urlshare/web-app/user-profile-data/schemas/user-profile-data.schema";
 import { StatusCodes } from "http-status-codes";
 import { GetServerSideProps, NextPage } from "next";
