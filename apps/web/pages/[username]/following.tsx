@@ -1,6 +1,6 @@
 import { prisma, User } from "@urlshare/db/prisma/client";
 import { FollowingRawEntries, getFollowingQuery } from "@urlshare/web-app/follow-user/queries/get-following";
-import { FollowingFollowersLayout } from "@urlshare/web-app/user-profile-data/layouts/following-followers.layout";
+import { ThreeColumnLayout } from "@urlshare/web-app/ui/three-column.layout";
 import { PUBLIC_USER_PROFILE_DATA_SELECT_FRAGMENT } from "@urlshare/web-app/user-profile-data/models/fragments";
 import { usernameSchema } from "@urlshare/web-app/user-profile-data/schemas/user-profile-data.schema";
 import { FollowingList } from "@urlshare/web-app/user-profile-data/ui/following-list";
@@ -40,16 +40,20 @@ const FollowingPage: NextPage<FollowingPageProps> = (props) => {
     const myProfile = userData.id === viewerId;
 
     return (
-      <FollowingFollowersLayout
+      <ThreeColumnLayout
         mainContent={<FollowingList profiles={profiles} username={userData.username} myProfile={myProfile} />}
         rightColumnContent={<UserProfileCard publicUserProfileData={userData} canFollow={canFollow} />}
       />
     );
   } else {
     return (
-      <div>
-        404 ... <code>{JSON.stringify(props.error)}</code>
-      </div>
+      <ThreeColumnLayout
+        mainContent={
+          <div className="py-10 text-center">
+            404 ... <code>{JSON.stringify(props.error)}</code>
+          </div>
+        }
+      />
     );
   }
 };

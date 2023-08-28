@@ -3,7 +3,7 @@ import { FeedVM, toFeedVM } from "@urlshare/web-app/feed/models/feed.vm";
 import { getUserFeedQuery } from "@urlshare/web-app/feed/queries/get-user-feed";
 import { FeedList } from "@urlshare/web-app/feed/ui/user-feed-list/feed-list";
 import { InfiniteUserFeed } from "@urlshare/web-app/feed/ui/user-feed-list/infinite-user-feed";
-import { UserFeedLayout } from "@urlshare/web-app/ui/user-feed.layout";
+import { ThreeColumnLayout } from "@urlshare/web-app/ui/three-column.layout";
 import { PUBLIC_USER_PROFILE_DATA_SELECT_FRAGMENT } from "@urlshare/web-app/user-profile-data/models/fragments";
 import { usernameSchema } from "@urlshare/web-app/user-profile-data/schemas/user-profile-data.schema";
 import { UserProfileCard } from "@urlshare/web-app/user-profile-data/ui/user-profile-card";
@@ -49,7 +49,7 @@ const UserProfilePage: NextPage<UserProfilePageProps> = (props) => {
     const canFollow = !myProfile && iAmLoggedIn;
 
     return (
-      <UserFeedLayout
+      <ThreeColumnLayout
         mainContent={
           <section>
             <div className="mb-5 flex items-center justify-between">
@@ -74,9 +74,13 @@ const UserProfilePage: NextPage<UserProfilePageProps> = (props) => {
     );
   } else {
     return (
-      <div>
-        404 ... <code>{JSON.stringify(props.error)}</code>
-      </div>
+      <ThreeColumnLayout
+        mainContent={
+          <div className="py-10 text-center">
+            404 ... <code>{JSON.stringify(props.error)}</code>
+          </div>
+        }
+      />
     );
   }
 };
