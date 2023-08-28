@@ -17,9 +17,9 @@ const AboutContent = () => {
           interesting too.
         </p>
         <p>
-          Connect with people who have similar interests and build your own collection of favorite links. It's like
-          creating your own digital scrapbook. By adding links you like, you're showing others what you're into. So, why
-          wait? Start sharing and discovering awesome stuff on our platform today!
+          Connect with people who have similar interests and build your own collection of favorite links. It&apos;s like
+          creating your own digital scrapbook. By adding links you like, you&apos;re showing others what you&apos;re
+          into. So, why wait? Start sharing and discovering awesome stuff on our platform today!
         </p>
         <p>
           <Link className={cn(buttonVariants({ variant: "default" }), "text-lg")} href="/auth/login">
