@@ -22,12 +22,18 @@ const HomepageContent: FC = () => {
       )}
       {status === "unauthenticated" && (
         <section className="grid place-content-center py-20 text-center">
-          <div className="max-w-md">
-            <h1 className="text-5xl font-bold">Hello there</h1>
-            <p className="py-6">This is still an alpha version, things might not work as expected.</p>
-            <Link className={cn(buttonVariants({ variant: "link" }), "text-lg")} href="/auth/login">
-              Login
-            </Link>
+          <h1 className="mb-6 text-5xl font-bold">Welcome to {WEB_APP_DOMAIN}</h1>
+          <div className="flex max-w-lg flex-col gap-6">
+            <p>
+              Discover a place where sharing links is as easy as using Twitter. Imagine a space where you can follow and
+              be followed.
+            </p>
+            <p>You can share cool links and discover ones that others think are interesting too.</p>
+            <p>
+              <Link className={cn(buttonVariants({ variant: "default" }), "text-lg")} href="/auth/login">
+                Login
+              </Link>
+            </p>
           </div>
         </section>
       )}
