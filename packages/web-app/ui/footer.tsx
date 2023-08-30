@@ -10,7 +10,7 @@ export const Footer = () => {
         <p>Copyright © 2023 - All right reserved</p>
       </div>
       <div className="flex items-center">
-        <a href="https://github.com/smolak/urls-project-vercel" target="_blank">
+        <a href="https://github.com/smolak/urlshare" target="_blank">
           <RiGithubFill size={30} className="inline" />
         </a>
       </div>
