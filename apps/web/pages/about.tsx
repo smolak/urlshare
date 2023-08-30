@@ -45,6 +45,7 @@ const AboutContent = () => {
               <A href="https://github.com/smolak/urlshare" target="_blank">
                 https://github.com/smolak/urlshare
               </A>
+              .
             </p>
           </div>
         </section>
