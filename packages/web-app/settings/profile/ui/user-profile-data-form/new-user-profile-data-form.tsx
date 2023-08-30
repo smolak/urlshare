@@ -13,7 +13,7 @@ import { useForm } from "react-hook-form";
 
 import { WEB_APP_DOMAIN } from "../../../../constants";
 import { api } from "../../../../trpc/client";
-import { Link } from "../../../../ui/link";
+import { A } from "../../../../ui/a";
 import { LoadingIndicator } from "../../../../ui/loading-indicator";
 import { generateApiKey } from "../../../../user/utils/generate-api-key";
 import { useCheckIfUserProfileDataExists } from "../../../../user-profile-data/hooks/use-check-if-user-profile-data-exists";
@@ -63,7 +63,7 @@ export const NewUserProfileDataForm = () => {
       {exists === "unknown" && (
         <div className="flex items-center justify-center p-10">
           <p>
-            Couldn&apos;t check the data. <Link href={route}>Try again</Link>.
+            Couldn&apos;t check the data. <A href={route}>Try again</A>.
           </p>
         </div>
       )}

@@ -10,7 +10,7 @@ import { FC, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { api } from "../../../../trpc/client";
-import { Link } from "../../../../ui/link";
+import { A } from "../../../../ui/a";
 import { LoadingIndicator } from "../../../../ui/loading-indicator";
 import { generateApiKey } from "../../../../user/utils/generate-api-key";
 import {
@@ -33,7 +33,7 @@ export const ExistingUserProfileDataForm = () => {
       {isError && (
         <div className="flex items-center justify-center p-10">
           <p>
-            Something went wrong, <Link href={route}>try again</Link>.
+            Something went wrong, <A href={route}>try again</A>.
           </p>
         </div>
       )}
