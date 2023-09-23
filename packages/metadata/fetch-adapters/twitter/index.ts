@@ -21,7 +21,10 @@ export const getTweetId = (tweetUrl: string) => {
 
 const createTweetMetadataUrl = (tweetId: string) => {
   const url = new URL(TWITTER_METADATA_URL);
+  const token = generateToken(tweetId);
+
   url.searchParams.set("id", tweetId);
+  url.searchParams.set("token", token);
 
   return url.toString();
 };
@@ -30,6 +33,10 @@ const fetchTweetDetails = async (tweetId: string) => {
   const { data } = await axios.get<TweetMetadata>(createTweetMetadataUrl(tweetId));
 
   return data;
+};
+
+export const generateToken = (tweetId: string) => {
+  return ((Number(tweetId) / 1e15) * Math.PI).toString(6 ** 2).replace(/(0+|\.)/g, "");
 };
 
 export const toMetadata = (tweetUrl: string, tweetDetails: TweetMetadata): Metadata => {

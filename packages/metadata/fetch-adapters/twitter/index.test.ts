@@ -2,7 +2,7 @@ import nock from "nock";
 import { afterEach, expect } from "vitest";
 
 import { tweetExampleMetadata } from "./fixtures/tweet-example-metadata";
-import { getTweetId, isTweetUrl, toMetadata, twitterMetadataFetchAdapter } from "./index";
+import { generateToken, getTweetId, isTweetUrl, toMetadata, twitterMetadataFetchAdapter } from "./index";
 import { tweetMetadataSchema } from "./tweet-metadata.schema";
 
 describe("isTweetUrl", () => {
@@ -55,7 +55,7 @@ describe("twitterMetadataFetchAdapter", () => {
 
     nock("https://cdn.syndication.twimg.com")
       .get("/tweet-result")
-      .query({ id: tweetId })
+      .query({ id: tweetId, token: generateToken(tweetId) })
       .reply(200, tweetExampleMetadata);
 
     const result = await twitterMetadataFetchAdapter(tweetUrl);
