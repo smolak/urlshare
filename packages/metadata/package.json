@@ -13,8 +13,5 @@
   },
   "devDependencies": {
     "nock": "^13.3.3"
-  },
-  "peerDependencies": {
-    "zod": "^3.22.2"
   }
 }
