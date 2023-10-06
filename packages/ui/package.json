@@ -19,8 +19,7 @@
     "@urlshare/shared": "*",
     "@urlshare/tsconfig": "*",
     "react-icons": "^4.10.1",
-    "tailwind-merge": "^1.14.0",
-    "zod": "^3.22.2"
+    "tailwind-merge": "^1.14.0"
   },
   "peerDependencies": {
     "next": "^13.4.19",
