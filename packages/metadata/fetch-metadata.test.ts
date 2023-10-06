@@ -1,7 +1,7 @@
 import nock from "nock";
 import { afterEach } from "vitest";
 
-import { getTweetId, TWITTER_METADATA_URL } from "./fetch-adapters/twitter";
+import { generateToken, getTweetId, TWITTER_METADATA_URL } from "./fetch-adapters/twitter";
 import { tweetExampleMetadata } from "./fetch-adapters/twitter/fixtures/tweet-example-metadata";
 import { fetchMetadata } from "./fetch-metadata";
 
@@ -17,12 +17,13 @@ describe("fetchMetadata", () => {
 
   describe("when the url is a Twitter Tweet / X Xeet (?)", () => {
     const tweetUrl = "https://twitter.com/ValaAfshar/status/1684664268547837952";
+    const token = generateToken(getTweetId(tweetUrl));
 
     it("should use twitter fetch adapter", async () => {
       const url = new URL(TWITTER_METADATA_URL);
       const scope = nock(url.origin)
         .get(url.pathname)
-        .query({ id: getTweetId(tweetUrl) })
+        .query({ id: getTweetId(tweetUrl), token })
         .reply(200, tweetExampleMetadata);
 
       await fetchMetadata(tweetUrl);
