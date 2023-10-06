@@ -12,7 +12,6 @@
     "@urlshare/logger": "*",
     "@urlshare/rss": "*",
     "@urlshare/shared": "*",
-    "@urlshare/trpc": "*",
     "@urlshare/ui": "*",
     "copy-to-clipboard": "^3.3.3",
     "debounce": "^1.2.1",
