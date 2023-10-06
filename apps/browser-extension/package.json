@@ -1,0 +1,31 @@
+{
+  "name": "browser-extension",
+  "displayName": "Browser extension",
+  "version": "0.0.1",
+  "description": "Browser extension for urlshare.app",
+  "author": "Jacek Smolak",
+  "scripts": {
+    "dev": "plasmo dev",
+    "build": "plasmo build",
+    "test": "plasmo test"
+  },
+  "dependencies": {
+    "@plasmohq/storage": "~1.8.0",
+    "@urlshare/ui": "*",
+    "plasmo": "0.83.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  },
+  "devDependencies": {
+    "@types/chrome": "0.0.246",
+    "@types/react": "18.2.21",
+    "@types/react-dom": "18.2.7",
+    "@urlshare/eslint-config": "*",
+    "@urlshare/tailwind-config": "*"
+  },
+  "manifest": {
+    "host_permissions": [
+      "https://*/*"
+    ]
+  }
+}
