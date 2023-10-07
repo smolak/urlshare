@@ -23,14 +23,15 @@ export const InfiniteFeedList: FC<InfiniteFeedListProps> = ({ feed, loadMore, is
       },
       { threshold: 1 }
     );
+    const current = observerTarget.current;
 
-    if (observerTarget.current) {
-      observer.observe(observerTarget.current);
+    if (current) {
+      observer.observe(current);
     }
 
     return () => {
-      if (observerTarget.current) {
-        observer.unobserve(observerTarget.current);
+      if (current) {
+        observer.unobserve(current);
       }
     };
   }, [observerTarget, loadMore, shouldLoadMore]);

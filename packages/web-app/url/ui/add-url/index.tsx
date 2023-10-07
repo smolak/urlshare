@@ -23,7 +23,7 @@ export const AddUrl = () => {
 
   useEffect(() => {
     setFocus("url");
-  }, []);
+  }, [setFocus]);
 
   const onSubmit = (values: FieldValues) => {
     setAddedUrl("");
