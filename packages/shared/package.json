@@ -8,6 +8,6 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "nanoid": "^4.0.2"
+    "nanoid": "^5.0.1"
   }
 }
