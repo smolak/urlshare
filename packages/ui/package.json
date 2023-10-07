@@ -23,6 +23,6 @@
   },
   "peerDependencies": {
     "next": "^13.5.4",
-    "react-hook-form": "^7.45.4"
+    "react-hook-form": "^7.47.0"
   }
 }
