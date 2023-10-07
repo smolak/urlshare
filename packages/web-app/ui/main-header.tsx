@@ -50,6 +50,17 @@ export const MainHeader: FC = () => {
                   About
                 </Link>
               </li>
+              <li>
+                <Link
+                  href="/privacy-policy"
+                  className={cn(
+                    pathname === "/privacy-policy" ? "text-primary" : "text-secondary",
+                    "transition-colors hover:text-slate-800"
+                  )}
+                >
+                  Privacy Policy
+                </Link>
+              </li>
             </ol>
           </nav>
         </div>
