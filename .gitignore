@@ -13,6 +13,9 @@ coverage
 out/
 build
 
+# plasmo
+.plasmo
+
 # misc
 .DS_Store
 *.pem
