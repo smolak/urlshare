@@ -18,7 +18,7 @@
     "@urlshare/db": "*",
     "@urlshare/shared": "*",
     "@urlshare/tsconfig": "*",
-    "react-icons": "^4.10.1",
+    "react-icons": "^4.11.0",
     "tailwind-merge": "^1.14.0"
   },
   "peerDependencies": {
