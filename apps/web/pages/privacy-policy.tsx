@@ -11,6 +11,24 @@ const PrivacyPolicyContent = () => {
       <div className="flex flex-col gap-6">
         <article>
           <h3 className="mb-3 text-2xl font-extrabold leading-tight text-gray-900 lg:mb-5 lg:text-3xl">
+            Privacy Policy for urlshare.app
+          </h3>
+          <div className="flex flex-col gap-6">
+            <p>
+              Right now there is no formal privacy policy. This is a hobby project, that, once matures, will get more
+              stricter rules here.
+            </p>
+            <p>
+              Feel free to register and share URLs. But don&apos;t go crazy with what you share. Until the rules are
+              formalized things I do here will be decided on as you go. For instance, if you will register as Elon Musk,
+              but you are not him, I will kindly ask you to change your name if it comes to that and do it for you if
+              you wont (or even block or delete your account).
+            </p>
+          </div>
+        </article>
+
+        <article>
+          <h3 className="mb-3 text-2xl font-extrabold leading-tight text-gray-900 lg:mb-5 lg:text-3xl">
             Data Privacy Policy for Browser Extension
           </h3>
           <div className="flex flex-col gap-6">
