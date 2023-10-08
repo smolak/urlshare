@@ -73,5 +73,5 @@ export const generateModelId: Prisma.Middleware = async (params: Prisma.Middlewa
     }
   }
 
-  return await next(params);
+  return next(params);
 };
