@@ -1,1 +1,0 @@
-# `@urlshare/user-profile-data`
