@@ -4,7 +4,7 @@ import { apiKeySchema, usernameSchema } from "../../schemas/user-profile-data.sc
 
 export type CreateUserProfileDataSchema = z.infer<typeof createUserProfileDataSchema>;
 
-const NOT_ALLOWED_NORMALIZED_USERNAMES = ["admin", "urlshare"];
+export const NOT_ALLOWED_NORMALIZED_USERNAMES = ["admin", "urlshare", "contact", "accounting", "security"];
 
 const restrictedUsernameSchema = usernameSchema.refine(
   (username) => {

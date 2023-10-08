@@ -2,7 +2,11 @@ import { expect } from "vitest";
 import { SafeParseError } from "zod";
 
 import { generateApiKey } from "../../../user/utils/generate-api-key";
-import { CreateUserProfileDataSchema, createUserProfileDataSchema } from "./create-user-profile-data.schema";
+import {
+  CreateUserProfileDataSchema,
+  createUserProfileDataSchema,
+  NOT_ALLOWED_NORMALIZED_USERNAMES,
+} from "./create-user-profile-data.schema";
 
 function generateCaseCombinations(word: string) {
   function backtrack(index: number, currentCombination: string) {
@@ -27,7 +31,9 @@ const apiKey = generateApiKey();
 
 describe("createUserProfileDataSchema", () => {
   it("fails validation when using not allowed usernames", () => {
-    const notAllowedUsernames = [...generateCaseCombinations("admin"), ...generateCaseCombinations("urlshare")];
+    const notAllowedUsernames = NOT_ALLOWED_NORMALIZED_USERNAMES.map((username) => {
+      return generateCaseCombinations(username);
+    }).flat();
 
     notAllowedUsernames.forEach((username) => {
       const data = {
