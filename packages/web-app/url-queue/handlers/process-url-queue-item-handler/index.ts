@@ -14,7 +14,10 @@ export type ProcessUrlQueueItemHandler = (
   res: NextApiResponse<ProcessUrlQueueItemResponse>
 ) => Promise<void>;
 
+const MAX_NUMBER_OF_ATTEMPTS = 5;
+
 export const processUrlQueueItemHandler: ProcessUrlQueueItemHandler = processUrlQueueItemHandlerFactory({
   fetchMetadata,
   logger,
+  maxNumberOfAttempts: MAX_NUMBER_OF_ATTEMPTS,
 });

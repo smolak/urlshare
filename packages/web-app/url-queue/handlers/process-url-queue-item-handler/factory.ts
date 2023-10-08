@@ -12,11 +12,16 @@ import { actionType, processUrlQueueItem } from "./process-url-queue-item";
 interface Params {
   fetchMetadata: FetchMetadata;
   logger: Logger;
+  maxNumberOfAttempts: number;
 }
 
 export type ProcessUrlQueueItemHandlerFactory = (params: Params) => ProcessUrlQueueItemHandler;
 
-export const processUrlQueueItemHandlerFactory: ProcessUrlQueueItemHandlerFactory = ({ fetchMetadata, logger }) => {
+export const processUrlQueueItemHandlerFactory: ProcessUrlQueueItemHandlerFactory = ({
+  fetchMetadata,
+  logger,
+  maxNumberOfAttempts,
+}) => {
   return async (req, res) => {
     const requestId = generateRequestId();
 
@@ -43,7 +48,7 @@ export const processUrlQueueItemHandlerFactory: ProcessUrlQueueItemHandlerFactor
     }
 
     try {
-      const urlEntryCreated = await processUrlQueueItem({ fetchMetadata, logger, requestId });
+      const urlEntryCreated = await processUrlQueueItem({ fetchMetadata, logger, requestId, maxNumberOfAttempts });
 
       if (urlEntryCreated === null) {
         logger.info({ requestId, actionType }, "Queue is empty.");

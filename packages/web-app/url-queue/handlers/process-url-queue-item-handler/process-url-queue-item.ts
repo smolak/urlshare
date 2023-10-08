@@ -4,11 +4,13 @@ import { ID_PLACEHOLDER_REPLACED_BY_ID_GENERATOR } from "@urlshare/db/prisma/mid
 import { Logger } from "@urlshare/logger";
 import { compressMetadata } from "@urlshare/metadata/compression";
 import { FetchMetadata } from "@urlshare/metadata/fetch-metadata";
+import { Metadata } from "@urlshare/metadata/types";
 
 interface Params {
   fetchMetadata: FetchMetadata;
   logger: Logger;
   requestId: string;
+  maxNumberOfAttempts: number;
 }
 
 type NoItemsInQueue = null;
@@ -16,7 +18,12 @@ type ProcessUrlQueueItem = (params: Params) => Promise<Url | NoItemsInQueue>;
 
 export const actionType = "processUrlQueueItemHandler";
 
-export const processUrlQueueItem: ProcessUrlQueueItem = async ({ fetchMetadata, logger, requestId }) => {
+export const processUrlQueueItem: ProcessUrlQueueItem = async ({
+  fetchMetadata,
+  logger,
+  requestId,
+  maxNumberOfAttempts,
+}) => {
   const urlQueueItem = await prisma.urlQueue.findFirst({
     select: {
       id: true,
@@ -46,7 +53,24 @@ export const processUrlQueueItem: ProcessUrlQueueItem = async ({ fetchMetadata, 
     },
   });
 
-  const metadata = await fetchMetadata(urlQueueItem.rawUrl);
+  let metadata: Metadata;
+
+  try {
+    metadata = await fetchMetadata(urlQueueItem.rawUrl);
+  } catch (_) {
+    if (urlQueueItem.attemptCount + 1 >= maxNumberOfAttempts) {
+      await prisma.urlQueue.update({
+        data: {
+          status: UrlQueueStatus.REJECTED,
+        },
+        where: {
+          id: urlQueueItem.id,
+        },
+      });
+    }
+
+    return null;
+  }
 
   logger.info({ requestId, actionType, metadata }, "Metadata fetched.");
 
