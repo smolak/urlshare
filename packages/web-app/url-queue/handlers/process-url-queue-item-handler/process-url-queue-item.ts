@@ -59,6 +59,11 @@ export const processUrlQueueItem: ProcessUrlQueueItem = async ({
     metadata = await fetchMetadata(urlQueueItem.rawUrl);
   } catch (_) {
     if (urlQueueItem.attemptCount + 1 >= maxNumberOfAttempts) {
+      logger.error(
+        { requestId, actionType, urlQueueItemId: urlQueueItem.id },
+        "Final attempt reached, rejecting URL queue item."
+      );
+
       await prisma.urlQueue.update({
         data: {
           status: UrlQueueStatus.REJECTED,
