@@ -18,8 +18,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       await addUrlWithApiKeyHandler(req, res);
       break;
 
+    case "OPTIONS":
+      res.status(StatusCodes.OK);
+      break;
+
     default:
-      res.setHeader("Allow", ["POST"]);
+      res.setHeader("Allow", ["POST", "OPTIONS"]);
       res.status(StatusCodes.METHOD_NOT_ALLOWED).end(`Method ${method} Not Allowed`);
   }
 }
