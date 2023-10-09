@@ -1,6 +1,6 @@
 {
   "name": "browser-extension",
-  "displayName": "Browser extension",
+  "displayName": "urlshare.app",
   "version": "0.0.1",
   "description": "Browser extension for urlshare.app",
   "author": "Jacek Smolak",
@@ -26,6 +26,9 @@
   "manifest": {
     "permissions": [
       "activeTab"
+    ],
+    "host_permissions": [
+      "https://urlshare.app"
     ]
   }
 }
