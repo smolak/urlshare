@@ -1,19 +1,17 @@
 import { addUrlWithApiKeyHandler } from "@urlshare/web-app/url/api/add-url-with-api-key";
 import { StatusCodes } from "http-status-codes";
 import { NextApiRequest, NextApiResponse } from "next";
+import NextCors from "nextjs-cors";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { method } = req;
 
   switch (method) {
     case "POST":
-      res.setHeader("Access-Control-Allow-Credentials", "true");
-      res.setHeader("Access-Control-Allow-Origin", "*");
-      res.setHeader("Access-Control-Allow-Methods", "GET,DELETE,PATCH,POST,PUT");
-      res.setHeader(
-        "Access-Control-Allow-Headers",
-        "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version"
-      );
+      await NextCors(req, res, {
+        methods: ["POST"],
+        origin: "*",
+      });
 
       await addUrlWithApiKeyHandler(req, res);
       break;
