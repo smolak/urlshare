@@ -20,6 +20,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     case "OPTIONS":
       res.status(StatusCodes.OK);
+      res.end();
       break;
 
     default:
