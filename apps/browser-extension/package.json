@@ -1,7 +1,7 @@
 {
   "name": "browser-extension",
   "displayName": "urlshare.app",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Browser extension for urlshare.app",
   "author": "Jacek Smolak",
   "scripts": {
