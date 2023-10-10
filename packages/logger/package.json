@@ -6,6 +6,6 @@
     "lint": "eslint \"./**/*.ts*\""
   },
   "dependencies": {
-    "pino": "^8.15.6"
+    "pino": "^8.16.0"
   }
 }
