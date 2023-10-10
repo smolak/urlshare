@@ -7,6 +7,6 @@
     "lint": "eslint \"./**/*.ts*\""
   },
   "devDependencies": {
-    "jest-extended": "^4.0.1"
+    "jest-extended": "^4.0.2"
   }
 }
