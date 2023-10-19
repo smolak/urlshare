@@ -16,16 +16,16 @@ model Account {
   type                     String
   provider                 String
   providerAccountId        String
-  refresh_token            String?  @db.VarChar(500)
-  access_token             String?  @db.VarChar(500)
+  refresh_token            String?  @db.Text
+  access_token             String?  @db.Text
   refresh_token_expires_in Int?
   expires_at               Int?
   token_type               String?
   scope                    String?
-  id_token                 String?  @db.VarChar(250)
+  id_token                 String?  @db.Text
   session_state            String?
   oauth_token_secret       String?
-  oauth_token              String?  @db.VarChar(250)
+  oauth_token              String?  @db.Text
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
