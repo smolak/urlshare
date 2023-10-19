@@ -22,7 +22,7 @@ const PrivacyPolicyContent = () => {
               Feel free to register and share URLs. But don&apos;t go crazy with what you share. Until the rules are
               formalized things I do here will be decided on as you go. For instance, if you will register as Elon Musk,
               but you are not him, I will kindly ask you to change your name if it comes to that and do it for you if
-              you wont (or even block or delete your account).
+              you won&apos;t (or even block or delete your account).
             </p>
           </div>
         </article>
