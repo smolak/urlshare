@@ -4,13 +4,25 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import { signIn, useSession } from "next-auth/react";
 import { useEffect } from "react";
-import { RiGithubFill } from "react-icons/ri";
+import { type IconType } from "react-icons";
+import { RiGithubFill, RiGoogleFill } from "react-icons/ri";
 
-const providers = [
+type Provider = {
+  name: string;
+  displayName: string;
+  Icon: IconType;
+};
+
+const providers: ReadonlyArray<Provider> = [
   {
     name: "github",
     displayName: "GitHub",
     Icon: RiGithubFill,
+  },
+  {
+    name: "google",
+    displayName: "Google",
+    Icon: RiGoogleFill,
   },
 ];
 
@@ -26,7 +38,7 @@ const Login = () => {
     }
   }, [session, push]);
 
-  const handleOAuthSignIn = (provider: string) => () => signIn(provider);
+  const handleOAuthSignIn = (providerName: Provider["name"]) => () => signIn(providerName);
 
   return (
     !session && (
@@ -39,7 +51,7 @@ const Login = () => {
             <div className="max-w-md space-y-8 text-center">
               <h2 className="text-3xl font-bold">Login to your account</h2>
             </div>
-            <div className="mt-8 flex justify-center space-y-6">
+            <div className="mt-8 flex flex-col justify-center space-y-6">
               {providers.map(({ displayName, name, Icon }) => (
                 <Button type="submit" className="gap-2" key={name} onClick={handleOAuthSignIn(name)}>
                   <Icon size={20} aria-hidden="true" />

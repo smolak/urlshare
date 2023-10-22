@@ -8,6 +8,8 @@
     "VERCEL_URL",
     "GITHUB_ID",
     "GITHUB_SECRET",
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET",
     "FEED_QUEUE_API_KEY",
     "URL_QUEUE_API_KEY"
   ],
@@ -21,6 +23,9 @@
     "dev": {
       "cache": false,
       "persistent": true
+    },
+    "db:push": {
+      "cache": false
     }
   }
 }
