@@ -26,7 +26,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@turbo/gen": "^1.10.15",
+    "@turbo/gen": "^1.10.16",
     "@types/node": "^18.18.5",
     "@urlshare/eslint-config": "*",
     "class-variance-authority": "^0.7.0",
