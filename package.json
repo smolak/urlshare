@@ -29,7 +29,7 @@
     "@types/node": "^18.18.5",
     "@urlshare/eslint-config": "*",
     "class-variance-authority": "^0.7.0",
-    "eslint": "^8.51.0",
+    "eslint": "^8.52.0",
     "prettier": "^3.0.3",
     "prettier-plugin-tailwindcss": "^0.5.6",
     "react": "^18.2.0",
