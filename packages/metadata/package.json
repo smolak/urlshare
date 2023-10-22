@@ -12,6 +12,6 @@
     "metadata-scraper": "^0.2.61"
   },
   "devDependencies": {
-    "nock": "^13.3.4"
+    "nock": "^13.3.6"
   }
 }
