@@ -5,6 +5,7 @@ import { GetServerSidePropsContext } from "next";
 import { type NextAuthOptions } from "next-auth";
 import { getServerSession } from "next-auth/next";
 import GithubProvider from "next-auth/providers/github";
+import GoogleProvider from "next-auth/providers/google";
 
 export const nextAuthOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -38,11 +39,30 @@ export const nextAuthOptions: NextAuthOptions = {
 
       return session;
     },
+    signIn({ account, profile }) {
+      if (account?.provider === "google") {
+        // @ts-ignore
+        return profile?.email_verified && profile?.email?.endsWith("@gmail.com");
+      }
+
+      return true; // Do different verification for other providers that don't have `email_verified`
+    },
   },
   providers: [
     GithubProvider({
       clientId: process.env.GITHUB_ID as string,
       clientSecret: process.env.GITHUB_SECRET as string,
+    }),
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID as string,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+      authorization: {
+        params: {
+          prompt: "consent",
+          access_type: "offline",
+          response_type: "code",
+        },
+      },
     }),
   ],
 };
