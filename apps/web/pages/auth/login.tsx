@@ -5,7 +5,7 @@ import { useRouter } from "next/router";
 import { signIn, useSession } from "next-auth/react";
 import { useEffect } from "react";
 import { type IconType } from "react-icons";
-import { RiFacebookFill, RiGithubFill, RiGoogleFill } from "react-icons/ri";
+import { RiGithubFill, RiGoogleFill } from "react-icons/ri";
 
 type Provider = {
   name: string;
@@ -14,11 +14,12 @@ type Provider = {
 };
 
 const providers: ReadonlyArray<Provider> = [
-  {
-    name: "facebook",
-    displayName: "Facebook",
-    Icon: RiFacebookFill,
-  },
+  // Facebook is so weird to set up ... I am still missing something for production use :/
+  // {
+  //   name: "facebook",
+  //   displayName: "Facebook",
+  //   Icon: RiFacebookFill,
+  // },
   {
     name: "github",
     displayName: "GitHub",
