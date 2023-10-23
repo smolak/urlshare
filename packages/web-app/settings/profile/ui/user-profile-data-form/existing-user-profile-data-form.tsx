@@ -3,12 +3,12 @@ import { UserProfileData } from "@prisma/client";
 import { Button } from "@urlshare/ui/design-system/ui/button";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from "@urlshare/ui/design-system/ui/form";
 import { Input } from "@urlshare/ui/design-system/ui/input";
-import copyToClipboard from "copy-to-clipboard";
-import { AtSign, Copy, KeyRound, RefreshCcw } from "lucide-react";
+import { AtSign, Info, KeyRound, RefreshCcw } from "lucide-react";
 import { useRouter } from "next/router";
 import { FC, useState } from "react";
 import { useForm } from "react-hook-form";
 
+import { REPOSITORY_URL } from "../../../../constants";
 import { api } from "../../../../trpc/client";
 import { A } from "../../../../ui/a";
 import { LoadingIndicator } from "../../../../ui/loading-indicator";
@@ -17,6 +17,7 @@ import {
   UpdateUserProfileDataSchema,
   updateUserProfileDataSchema,
 } from "../../../../user-profile-data/router/procedures/update-user-profile-data.schema";
+import { CopyToClipboard } from "./copy-to-clipboard";
 
 export const ExistingUserProfileDataForm = () => {
   const { data, isSuccess, isError, isLoading } = api.userProfileData.getPrivateUserProfileData.useQuery();
@@ -96,13 +97,18 @@ const UserProfileDataForm: FC<FormValues> = ({ username, apiKey }) => {
                   onClick={() => setGeneratedApiKey(generateApiKey())}
                   className="absolute right-10 top-3.5 cursor-copy text-lg text-gray-400 hover:text-gray-700"
                 />
-                <Copy
-                  size={14}
-                  onClick={() => copyToClipboard(generatedApiKey)}
-                  className="absolute right-3.5 top-3.5 cursor-copy text-lg text-gray-400 hover:text-gray-700"
-                />
+                <CopyToClipboard string={generatedApiKey} />
               </div>
-              <FormDescription>Can only be generated.</FormDescription>
+              <FormDescription className="flex items-center gap-2">
+                <Info size={14} strokeWidth={2.5} />{" "}
+                <span>
+                  Can only be generated. If you&apos;re wondering how it&apos;s done, checkout the{" "}
+                  <A href={REPOSITORY_URL} target="_blank">
+                    source code
+                  </A>
+                  .
+                </span>
+              </FormDescription>
             </FormItem>
           )}
         />

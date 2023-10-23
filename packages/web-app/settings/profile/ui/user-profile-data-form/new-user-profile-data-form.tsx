@@ -4,14 +4,13 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } fr
 import { Input } from "@urlshare/ui/design-system/ui/input";
 import { Separator } from "@urlshare/ui/design-system/ui/separator";
 import { cn } from "@urlshare/ui/utils";
-import copyToClipboard from "copy-to-clipboard";
 import debounce from "debounce";
-import { AtSign, Copy, KeyRound, RefreshCcw, UserCheck2, UserX2 } from "lucide-react";
+import { AtSign, Info, KeyRound, RefreshCcw, UserCheck2, UserX2 } from "lucide-react";
 import { useRouter } from "next/router";
 import { ChangeEvent, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
-import { WEB_APP_DOMAIN } from "../../../../constants";
+import { REPOSITORY_URL, WEB_APP_DOMAIN } from "../../../../constants";
 import { api } from "../../../../trpc/client";
 import { A } from "../../../../ui/a";
 import { LoadingIndicator } from "../../../../ui/loading-indicator";
@@ -22,6 +21,7 @@ import {
   createUserProfileDataSchema,
 } from "../../../../user-profile-data/router/procedures/create-user-profile-data.schema";
 import { usernameCheckSchema } from "../../../../user-profile-data/router/procedures/username-check.schema";
+import { CopyToClipboard } from "./copy-to-clipboard";
 
 interface FormValues {
   username: string;
@@ -109,6 +109,7 @@ const UserProfileDataForm = () => {
   const [usernamePlaceholder, setUsernamePlaceholder] = useState("");
   const [generatedApiKey, setGeneratedApiKey] = useState(apiKey);
   const [isUsernameAvailable, setIsUsernameAvailable] = useState<null | boolean>(null);
+  const [copied, setCopied] = useState(false);
 
   const { mutate: usernameCheck } = api.userProfileData.usernameCheck.useMutation({
     onSuccess: (data) => {
@@ -119,6 +120,16 @@ const UserProfileDataForm = () => {
   useEffect(() => {
     setUsernamePlaceholder(usernameExamples.sort(() => Math.random() - 0.5)[0]);
   }, []);
+
+  useEffect(() => {
+    if (copied) {
+      const timeout = setTimeout(() => {
+        setCopied(false);
+      }, 1_500);
+
+      return () => clearTimeout(timeout);
+    }
+  }, [copied]);
 
   const onSubmit = async (userProfileData: FormValues) => {
     saveUserProfileData(userProfileData);
@@ -151,10 +162,12 @@ const UserProfileDataForm = () => {
   return (
     <section className="flex flex-col gap-4 sm:gap-10">
       <div>
-        <h3 className="text-xl font-medium leading-6 text-gray-900">
-          Welcome to <strong>{WEB_APP_DOMAIN}</strong>
+        <h3 className="text-4xl font-medium leading-6 text-gray-900">
+          Welcome to <strong>{WEB_APP_DOMAIN}</strong> 🤩
         </h3>
-        <p className="mt-1 max-w-2xl text-sm text-gray-500">There are couple of things you need to do first.</p>
+        <p className="mt-3 max-w-2xl text-sm text-gray-500">
+          Before you continue, make sure you fill out the form below.
+        </p>
         <Separator className="mt-5" />
       </div>
 
@@ -214,15 +227,20 @@ const UserProfileDataForm = () => {
                   <RefreshCcw
                     size={14}
                     onClick={() => setGeneratedApiKey(generateApiKey())}
-                    className="absolute right-10 top-3.5 cursor-copy text-lg text-gray-400 hover:text-gray-700"
+                    className="absolute right-10 top-3.5 text-lg text-gray-400 hover:text-gray-700"
                   />
-                  <Copy
-                    size={14}
-                    onClick={() => copyToClipboard(generatedApiKey)}
-                    className="absolute right-3.5 top-3.5 cursor-copy text-lg text-gray-400 hover:text-gray-700"
-                  />
+                  <CopyToClipboard string={generatedApiKey} />
                 </div>
-                <FormDescription>Can only be generated.</FormDescription>
+                <FormDescription className="flex items-center gap-2">
+                  <Info size={14} strokeWidth={2.5} />{" "}
+                  <span>
+                    Can only be generated. If you&apos;re wondering how it&apos;s done, checkout the{" "}
+                    <A href={REPOSITORY_URL} target="_blank">
+                      source code
+                    </A>
+                    .
+                  </span>
+                </FormDescription>
               </FormItem>
             )}
           />
