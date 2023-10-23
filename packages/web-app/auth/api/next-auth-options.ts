@@ -4,6 +4,7 @@ import { prisma } from "@urlshare/db/prisma/client";
 import { GetServerSidePropsContext } from "next";
 import { type NextAuthOptions } from "next-auth";
 import { getServerSession } from "next-auth/next";
+import FacebookProvider from "next-auth/providers/facebook";
 import GithubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
 
@@ -63,6 +64,10 @@ export const nextAuthOptions: NextAuthOptions = {
           response_type: "code",
         },
       },
+    }),
+    FacebookProvider({
+      clientId: process.env.FACEBOOK_CLIENT_ID as string,
+      clientSecret: process.env.FACEBOOK_CLIENT_SECRET as string,
     }),
   ],
 };
