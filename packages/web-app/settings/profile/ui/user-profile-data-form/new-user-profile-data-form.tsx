@@ -151,7 +151,9 @@ const UserProfileDataForm = () => {
   return (
     <section className="flex flex-col gap-4 sm:gap-10">
       <div>
-        <h3 className="text-xl font-medium leading-6 text-gray-900">Welcome to ${WEB_APP_DOMAIN}</h3>
+        <h3 className="text-xl font-medium leading-6 text-gray-900">
+          Welcome to <strong>{WEB_APP_DOMAIN}</strong>
+        </h3>
         <p className="mt-1 max-w-2xl text-sm text-gray-500">There are couple of things you need to do first.</p>
         <Separator className="mt-5" />
       </div>
