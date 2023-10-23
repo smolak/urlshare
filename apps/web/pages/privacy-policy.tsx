@@ -24,6 +24,11 @@ const PrivacyPolicyContent = () => {
               but you are not him, I will kindly ask you to change your name if it comes to that and do it for you if
               you won&apos;t (or even block or delete your account).
             </p>
+            <p>
+              As this project is in a very early stage, there is no formal &quot;delete my account&quot; process. But if
+              you&apos;d still like to do it use the{" "}
+              <A href="https://github.com/smolak/urlshare/issues">issues section</A> and request it.
+            </p>
           </div>
         </article>
 
@@ -44,7 +49,7 @@ const PrivacyPolicyContent = () => {
             <p>
               If you&apos;re curious what lies under the hood, see for yourself. The{" "}
               <A href="https://github.com/smolak/urlshare" target="_blank">
-                source-code
+                source code
               </A>{" "}
               for the browser extension is open.
             </p>
