@@ -1,3 +1,4 @@
+import { REPOSITORY_URL } from "@urlshare/web-app/constants";
 import { A } from "@urlshare/web-app/ui/a";
 import { ThreeColumnLayout } from "@urlshare/web-app/ui/three-column.layout";
 import Head from "next/head";
@@ -26,8 +27,8 @@ const PrivacyPolicyContent = () => {
             </p>
             <p>
               As this project is in a very early stage, there is no formal &quot;delete my account&quot; process. But if
-              you&apos;d still like to do it use the{" "}
-              <A href="https://github.com/smolak/urlshare/issues">issues section</A> and request it.
+              you&apos;d still like to do it use the <A href={`${REPOSITORY_URL}/issues`}>issues section</A> and request
+              it.
             </p>
           </div>
         </article>
@@ -48,7 +49,7 @@ const PrivacyPolicyContent = () => {
             </ul>
             <p>
               If you&apos;re curious what lies under the hood, see for yourself. The{" "}
-              <A href="https://github.com/smolak/urlshare" target="_blank">
+              <A href={REPOSITORY_URL} target="_blank">
                 source code
               </A>{" "}
               for the browser extension is open.
