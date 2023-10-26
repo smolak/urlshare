@@ -32,7 +32,11 @@ export const getUserFeed = publicProcedure
     try {
       logger.info({ requestId, path }, "Fetching user's feed list.");
 
-      const feedRawEntries = await getUserFeedQuery(input.userId, itemsPerFetch, input.cursor);
+      const feedRawEntries = await getUserFeedQuery({
+        userId: input.userId,
+        limit: itemsPerFetch,
+        cursor: input.cursor,
+      });
       const feed = feedRawEntries.map(toFeedVM);
 
       logger.info({ requestId, path, userId: input.userId }, "User's feed list fetched.");

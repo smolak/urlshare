@@ -2,6 +2,7 @@ import { buttonVariants } from "@urlshare/ui/design-system/ui/button";
 import { cn } from "@urlshare/ui/utils";
 import { WEB_APP_DOMAIN } from "@urlshare/web-app/constants";
 import { InfiniteUserFeed } from "@urlshare/web-app/feed/ui/user-feed-list/infinite-user-feed";
+import { UserFeedSourceSelector } from "@urlshare/web-app/feed/ui/user-feed-source-selector";
 import { LoadingIndicator } from "@urlshare/web-app/ui/loading-indicator";
 import { ThreeColumnLayout } from "@urlshare/web-app/ui/three-column.layout";
 import { AddUrl } from "@urlshare/web-app/url/ui/add-url";
@@ -42,6 +43,7 @@ const HomepageContent: FC = () => {
           <aside>
             <AddUrl />
           </aside>
+          <UserFeedSourceSelector className="md:max-w-[420px]" author="Me" />
           <InfiniteUserFeed userId={data?.user.id} />
         </div>
       )}
