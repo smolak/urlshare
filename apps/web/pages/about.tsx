@@ -15,7 +15,9 @@ const AboutContent = () => {
       </header>
       <div className="flex flex-col gap-6">
         <section>
-          <h3 className="mb-3 text-2xl font-extrabold leading-tight text-gray-900 lg:mb-5 lg:text-3xl">What is it?</h3>
+          <h3 id="what-is-it" className="mb-3 text-2xl font-extrabold leading-tight text-gray-900 lg:mb-5 lg:text-3xl">
+            What is it?
+          </h3>
           <div className="flex flex-col gap-6">
             <p>
               Discover a place where sharing links is as easy as using Twitter. Imagine a space where you can follow and
@@ -36,7 +38,12 @@ const AboutContent = () => {
         </section>
         <hr />
         <section>
-          <h3 className="mb-3 text-2xl font-extrabold leading-tight text-gray-900 lg:mb-5 lg:text-3xl">Transparency</h3>
+          <h3
+            id="transparency"
+            className="mb-3 text-2xl font-extrabold leading-tight text-gray-900 lg:mb-5 lg:text-3xl"
+          >
+            Transparency
+          </h3>
           <div className="flex flex-col gap-6">
             <p>
               The whole codebase, DB schema, etc. are public.
@@ -51,7 +58,10 @@ const AboutContent = () => {
         </section>
         <hr />
         <section>
-          <h3 className="mb-3 text-2xl font-extrabold leading-tight text-gray-900 lg:mb-5 lg:text-3xl">
+          <h3
+            id="collaboration"
+            className="mb-3 text-2xl font-extrabold leading-tight text-gray-900 lg:mb-5 lg:text-3xl"
+          >
             Collaboration
           </h3>
           <div className="flex flex-col gap-6">
