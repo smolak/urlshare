@@ -46,6 +46,14 @@ export const InfiniteUserFeed: FC<InfiniteUserFeedProps> = ({ userId, from }) =>
   const feed = aggregateFeeds(data);
   const shouldLoadMore = Boolean(getNextCursor(data));
 
+  if (feed.length === 0) {
+    return (
+      <div className="rounded rounded-xl bg-gray-50 p-10">
+        <h2 className="text-md font-bold">No URLs yet. Add some!</h2>
+      </div>
+    );
+  }
+
   return (
     <InfiniteFeedList
       feed={feed}

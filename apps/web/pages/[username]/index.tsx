@@ -77,7 +77,9 @@ const UserProfilePage: NextPage<UserProfilePageProps> = (props) => {
                   )}
                 </>
               ) : (
-                <div>No URLs yet.</div>
+                <div className="rounded rounded-xl bg-gray-50 p-10">
+                  <h2 className="text-md font-bold">No URLs yet.</h2>
+                </div>
               )}
             </div>
           </section>
