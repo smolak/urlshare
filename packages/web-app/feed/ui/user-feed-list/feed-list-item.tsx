@@ -63,7 +63,7 @@ export const FeedListItem: FC<FeedListItemProps> = ({ feedItem, interactions }) 
               href={url.url}
               title={url.metadata.title}
               target="_blank"
-              className="flex max-h-96 place-content-center overflow-hidden"
+              className="flex max-h-96 place-content-center overflow-hidden rounded rounded-md"
             >
               <img src={url.metadata.image} alt={url.metadata.title} className="object-cover" />
             </a>
