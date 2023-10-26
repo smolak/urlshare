@@ -6,6 +6,7 @@ import { publicProcedure } from "../../../trpc/server";
 import { userIdSchema } from "../../../user/schemas/user-id.schema";
 import { FeedVM, toFeedVM } from "../../models/feed.vm";
 import { getUserFeedQuery } from "../../queries/get-user-feed";
+import { feedSourceSchema } from "../../ui/user-feed-source-selector/feed-source";
 
 type QuerySchema = z.infer<typeof querySchema>;
 
@@ -13,6 +14,7 @@ const itemsPerFetch = getConfig().serverRuntimeConfig.userFeedList.itemsPerPage;
 const querySchema = z.object({
   cursor: z.date().optional(),
   userId: userIdSchema,
+  feedSource: feedSourceSchema,
 });
 
 export type GetUserFeedResponse = {
@@ -36,6 +38,7 @@ export const getUserFeed = publicProcedure
         userId: input.userId,
         limit: itemsPerFetch,
         cursor: input.cursor,
+        feedSource: input.feedSource,
       });
       const feed = feedRawEntries.map(toFeedVM);
 

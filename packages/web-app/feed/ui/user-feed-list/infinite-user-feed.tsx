@@ -1,5 +1,6 @@
 import { User } from "@prisma/client";
 import { InfiniteData } from "@tanstack/react-query";
+import { useSearchParams } from "next/navigation";
 import { FC } from "react";
 
 import { api } from "../../../trpc/client";
@@ -7,6 +8,7 @@ import { FeedVM } from "../../models/feed.vm";
 import { GetUserFeedResponse } from "../../router/procedures/get-user-feed";
 import { ErrorLoadingFeed } from "../error-loading-feed";
 import { LoadingFeed } from "../loading-feed";
+import { feedSourceSchema } from "../user-feed-source-selector/feed-source";
 import { InfiniteFeedList } from "./infinite-feed-list";
 
 const aggregateFeeds = (data: InfiniteData<GetUserFeedResponse>) => {
@@ -25,9 +27,13 @@ type InfiniteUserFeedProps = {
 };
 
 export const InfiniteUserFeed: FC<InfiniteUserFeedProps> = ({ userId, from }) => {
+  const searchParams = useSearchParams();
+  const source = feedSourceSchema.parse(searchParams.get("source"));
+
   const { data, isLoading, isError, fetchNextPage, isFetchingNextPage } = api.feed.getUserFeed.useInfiniteQuery(
     {
       userId,
+      feedSource: source,
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
