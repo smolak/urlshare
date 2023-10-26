@@ -3,8 +3,11 @@ import { FeedVM, toFeedVM } from "@urlshare/web-app/feed/models/feed.vm";
 import { getUserFeedQuery } from "@urlshare/web-app/feed/queries/get-user-feed";
 import { FeedList } from "@urlshare/web-app/feed/ui/user-feed-list/feed-list";
 import { InfiniteUserFeed } from "@urlshare/web-app/feed/ui/user-feed-list/infinite-user-feed";
+import { UserFeedSourceSelector } from "@urlshare/web-app/feed/ui/user-feed-source-selector";
+import { feedSourceSchema } from "@urlshare/web-app/feed/ui/user-feed-source-selector/feed-source";
 import { ThreeColumnLayout } from "@urlshare/web-app/ui/three-column.layout";
 import { PUBLIC_USER_PROFILE_DATA_SELECT_FRAGMENT } from "@urlshare/web-app/user-profile-data/models/fragments";
+import { PublicUserProfileDataVM } from "@urlshare/web-app/user-profile-data/models/public-user-profile-data.vm";
 import { usernameSchema } from "@urlshare/web-app/user-profile-data/schemas/user-profile-data.schema";
 import { UserProfileCard } from "@urlshare/web-app/user-profile-data/ui/user-profile-card";
 import { StatusCodes } from "http-status-codes";
@@ -41,6 +44,12 @@ type UserProfilePageProps =
       errorCode: number;
     };
 
+const createForm = (username: PublicUserProfileDataVM["username"]): string => {
+  const endsWithS = username.substring(username.length - 1).toLowerCase() === "s";
+
+  return endsWithS ? `${username}'` : `${username}'s`;
+};
+
 const UserProfilePage: NextPage<UserProfilePageProps> = (props) => {
   if (props.userData) {
     const { self, userData, feed, itemsPerPage } = props;
@@ -53,20 +62,24 @@ const UserProfilePage: NextPage<UserProfilePageProps> = (props) => {
         mainContent={
           <section>
             <div className="mb-5 flex items-center justify-between">
-              <h1 className="text-lg font-bold">{myProfile ? "My URLs" : `URLs added by ${userData.username}`}</h1>
+              <h1 className="text-lg font-bold">{myProfile ? "My URLs" : `${createForm(userData.username)} URLs`}</h1>
               <Link href={`${userData.username}/rss.xml`} className="-mt-3 p-3">
                 <RssIcon size={16} />
               </Link>
             </div>
-            {feed.length === 0 && <div>No URLs yet.</div>}
-            {feed.length > 0 && (
-              <div className="flex flex-col gap-4">
-                <FeedList feed={feed} />
-                {feed.length === itemsPerPage && (
-                  <InfiniteUserFeed userId={userData.id} from={feed[feed.length - 1].createdAt} />
-                )}
-              </div>
-            )}
+            <div className="flex flex-col gap-4">
+              <UserFeedSourceSelector className="md:max-w-[420px]" author={myProfile ? "Me" : userData.username} />
+              {feed.length > 0 ? (
+                <>
+                  <FeedList feed={feed} />
+                  {feed.length === itemsPerPage && (
+                    <InfiniteUserFeed userId={userData.id} from={feed[feed.length - 1].createdAt} />
+                  )}
+                </>
+              ) : (
+                <div>No URLs yet.</div>
+              )}
+            </div>
           </section>
         }
         rightColumnContent={<UserProfileCard publicUserProfileData={userData} canFollow={canFollow} />}
@@ -129,8 +142,13 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res, query }
     };
   }
 
+  const feedSource = feedSourceSchema.parse(query.source);
   const itemsPerPage = getConfig().serverRuntimeConfig.userFeedList.itemsPerPage;
-  const feedRawEntries = await getUserFeedQuery(maybePublicUserData.userId, itemsPerPage);
+  const feedRawEntries = await getUserFeedQuery({
+    userId: maybePublicUserData.userId,
+    limit: itemsPerPage,
+    feedSource,
+  });
 
   const feed = feedRawEntries.map(toFeedVM);
   const { userId, createdAt, ...userData } = maybePublicUserData;
