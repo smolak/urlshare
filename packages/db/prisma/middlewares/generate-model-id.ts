@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { generateAccountId } from "@urlshare/account/utils/generate-account-id";
 import { generateSessionId } from "@urlshare/session/utils/generate-session-id";
+import { generateCategoryId } from "@urlshare/web-app/category/utils/generate-category-id";
 import { generateFeedId } from "@urlshare/web-app/feed/utils/generate-feed-id";
 import { generateFeedQueueId } from "@urlshare/web-app/feed-queue/utils/generate-feed-queue-id";
 import { generateUrlId } from "@urlshare/web-app/url/utils/generate-url-id";
@@ -69,6 +70,10 @@ export const generateModelId: Prisma.Middleware = async (params: Prisma.Middlewa
 
       case "FeedQueue":
         params.args.data.id = generateFeedQueueId();
+        break;
+
+      case "Category":
+        params.args.data.id = generateCategoryId();
         break;
     }
   }
