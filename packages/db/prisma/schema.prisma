@@ -99,6 +99,16 @@ model UserUrl {
   @@index([urlId])
 }
 
+model Category {
+  id        String   @id
+  userId    String
+  name      String   @db.Char(40)
+  urlsCount Int      @default(0) @db.UnsignedInt
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
 model Feed {
   id        String   @id
   userId    String
