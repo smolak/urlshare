@@ -107,6 +107,7 @@ model Category {
   createdAt DateTime @default(now())
 
   @@index([userId])
+  @@index([userId, name])
 }
 
 model Feed {
