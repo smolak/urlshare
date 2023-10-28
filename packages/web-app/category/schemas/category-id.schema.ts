@@ -3,6 +3,8 @@ import z from "zod";
 
 import { CATEGORY_ID_PREFIX } from "../utils/generate-category-id";
 
+export type CategoryId = z.infer<typeof categoryIdSchema>;
+
 export const categoryIdSchema = z
   .string()
   .trim()
