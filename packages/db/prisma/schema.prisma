@@ -94,20 +94,34 @@ model UserUrl {
   feeds           Feed[]
   feedQueue       FeedQueue?
   createdAt       DateTime        @default(now())
+  userUrlCategory UserUrlCategory[]
 
   @@index([userId])
   @@index([urlId])
 }
 
 model Category {
-  id        String   @id
-  userId    String
-  name      String   @db.Char(40)
-  urlsCount Int      @default(0) @db.UnsignedInt
-  createdAt DateTime @default(now())
+  id              String            @id
+  userId          String
+  name            String            @db.Char(40)
+  urlsCount       Int               @default(0) @db.UnsignedInt
+  createdAt       DateTime          @default(now())
+  UserUrlCategory UserUrlCategory[]
 
   @@index([userId])
   @@index([userId, name])
+}
+
+model UserUrlCategory {
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  userUrlId  String
+  userUrl UserUrl @relation(fields: [userUrlId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@id([categoryId, userUrlId])
+  @@index([categoryId])
+  @@index([userUrlId])
 }
 
 model Feed {
