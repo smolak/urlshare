@@ -85,15 +85,15 @@ model Url {
 }
 
 model UserUrl {
-  id              String          @id
-  userProfileData UserProfileData @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  id              String            @id
+  userProfileData UserProfileData   @relation(fields: [userId], references: [userId], onDelete: Cascade)
   userId          String
-  url             Url             @relation(fields: [urlId], references: [id], onDelete: Cascade)
+  url             Url               @relation(fields: [urlId], references: [id], onDelete: Cascade)
   urlId           String
-  likes           Int             @default(0) @db.UnsignedInt
+  likes           Int               @default(0) @db.UnsignedInt
   feeds           Feed[]
   feedQueue       FeedQueue?
-  createdAt       DateTime        @default(now())
+  createdAt       DateTime          @default(now())
   userUrlCategory UserUrlCategory[]
 
   @@index([userId])
@@ -116,10 +116,10 @@ model UserUrlCategory {
   categoryId String
   category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   userUrlId  String
-  userUrl UserUrl @relation(fields: [userUrlId], references: [id], onDelete: Cascade)
+  userUrl    UserUrl  @relation(fields: [userUrlId], references: [id], onDelete: Cascade)
   createdAt  DateTime @default(now())
 
-  @@id([categoryId, userUrlId])
+  @@id([userUrlId, categoryId])
   @@index([categoryId])
   @@index([userUrlId])
 }
