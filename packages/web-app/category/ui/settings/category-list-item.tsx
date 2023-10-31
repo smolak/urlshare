@@ -2,6 +2,7 @@ import { Pencil, Trash2 } from "lucide-react";
 import { FC, useState } from "react";
 
 import { CategoryVM } from "../../types/category.vm";
+import { ActionButton } from "./action-button";
 import { DeleteCategory } from "./delete-category";
 import { EditCategory } from "./edit-category";
 
@@ -39,18 +40,12 @@ export const CategoryListItem: FC<CategoryListItemProps> = ({ category, onCatego
         {categoryName}
       </span>
       <span className="flex">
-        <button
-          onClick={() => setState("edit")}
-          className="flex h-[32px] w-[32px] items-center justify-center rounded rounded-md hover:bg-blue-100"
-        >
+        <ActionButton onClick={() => setState("edit")} className="hover:bg-blue-100">
           <Pencil size={14} />
-        </button>
-        <button
-          onClick={() => setState("delete")}
-          className="flex h-[32px] w-[32px] items-center justify-center rounded rounded-md hover:bg-red-100"
-        >
+        </ActionButton>
+        <ActionButton onClick={() => setState("delete")} className="hover:bg-red-100">
           <Trash2 size={14} />
-        </button>
+        </ActionButton>
       </span>
     </span>
   );
