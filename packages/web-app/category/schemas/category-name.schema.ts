@@ -5,9 +5,10 @@ const MAX_LENGTH = 30;
 export const categoryNameSchema = z
   .string()
   .trim()
+  .min(1, { message: "Category name can't be empty." })
   .refine(
     (val) => val.length <= MAX_LENGTH,
     (val) => ({
-      message: `Category name too long. Detected ${val.length} characters and max ${MAX_LENGTH} is allowed.`,
+      message: `Category name too long. ${val.length} characters, max ${MAX_LENGTH}.`,
     })
   );

@@ -25,6 +25,25 @@ export const updateCategory = protectedProcedure
       });
     }
 
+    const maybeExists = await prisma.category.findFirst({
+      where: {
+        userId,
+        name,
+        id: {
+          not: id,
+        },
+      },
+    });
+
+    if (maybeExists) {
+      logger.error({ requestId, path }, `Category (${name}) exists.`);
+
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: `Category name exists. Use different category name.`,
+      });
+    }
+
     const updatedCategory = await prisma.category.update({
       data: {
         name,
