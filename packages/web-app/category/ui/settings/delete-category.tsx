@@ -1,13 +1,17 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@urlshare/ui/design-system/ui/input";
 import { cn } from "@urlshare/ui/utils";
-import { Ban, Info, Loader2, Trash } from "lucide-react";
+import { Info, Trash } from "lucide-react";
 import React, { FC, useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { api } from "../../../trpc/client";
 import { DeleteCategorySchema, deleteCategorySchema } from "../../router/procedures/delete-category.schema";
 import { CategoryVM } from "../../types/category.vm";
+import { ActionPending } from "./action-pending";
+import { CancelAction } from "./cancel-action";
+import { StickyErrorMessage } from "./sticky-error-message";
+import { SubmitButton } from "./submit-button";
 
 type EditCategoryProps = {
   category: CategoryVM;
@@ -73,35 +77,18 @@ export const DeleteCategory: FC<EditCategoryProps> = ({ category, onDelete, onCa
 
         <div className="flex">
           {isLoading ? (
-            <span className="flex h-[32px] w-[32px] items-center justify-center">
-              <Loader2 className="animate-spin cursor-progress" size={14} />
-            </span>
+            <ActionPending />
           ) : (
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="flex h-[32px] w-[32px] items-center justify-center rounded rounded-md hover:bg-green-100"
-            >
+            <SubmitButton isSubmitting={isLoading}>
               <Trash size={14} />
-            </button>
+            </SubmitButton>
           )}
-          <button
-            type="button"
-            onClick={() => onCancel()}
-            disabled={isLoading}
-            className="border-1 flex h-[31px] w-[31px] items-center justify-center rounded rounded-md border-gray-200 hover:border"
-          >
-            <Ban size={14} />
-          </button>
+          <CancelAction actionPending={isLoading} onCancelAction={onCancel} />
         </div>
 
         <Input {...register("id")} type="hidden" />
       </div>
-      {errorResponse !== "" ? (
-        <p className="absolute rounded rounded-md rounded-t-none bg-red-50 px-2 py-1 text-sm text-red-600">
-          {errorResponse}
-        </p>
-      ) : null}
+      {errorResponse !== "" ? <StickyErrorMessage>{errorResponse}</StickyErrorMessage> : null}
     </form>
   );
 };
