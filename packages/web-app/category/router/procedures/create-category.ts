@@ -29,7 +29,7 @@ export const createCategory = protectedProcedure
 
       throw new TRPCError({
         code: "BAD_REQUEST",
-        message: `Category (${name}) exists. Use different category name.`,
+        message: `Category name exists. Use different category name.`,
       });
     }
 

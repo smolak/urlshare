@@ -1,26 +1,31 @@
 import { protectedProcedure } from "../../../trpc/server";
+import { CategoryVM } from "../../types/category.vm";
 
-export const getMyCategories = protectedProcedure.query(async ({ ctx: { logger, requestId, prisma, session } }) => {
-  const path = "category.getMyCategories";
-  const userId = session.user.id;
+type GetMyCategoriesResult = ReadonlyArray<CategoryVM>;
 
-  logger.info({ requestId, path, userId }, "Fetching my categories.");
+export const getMyCategories = protectedProcedure.query<GetMyCategoriesResult>(
+  async ({ ctx: { logger, requestId, prisma, session } }) => {
+    const path = "category.getMyCategories";
+    const userId = session.user.id;
 
-  const categories = await prisma.category.findMany({
-    select: {
-      id: true,
-      name: true,
-      urlsCount: true,
-    },
-    where: {
-      userId,
-    },
-    orderBy: {
-      name: "asc",
-    },
-  });
+    logger.info({ requestId, path, userId }, "Fetching my categories.");
 
-  logger.info({ requestId, path, userId }, "My categories fetched.");
+    const categories = await prisma.category.findMany({
+      select: {
+        id: true,
+        name: true,
+        urlsCount: true,
+      },
+      where: {
+        userId,
+      },
+      orderBy: {
+        name: "asc",
+      },
+    });
 
-  return categories;
-});
+    logger.info({ requestId, path, userId }, "My categories fetched.");
+
+    return categories;
+  }
+);
