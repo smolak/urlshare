@@ -44,7 +44,7 @@ export const AddUrl = () => {
             placeholder="https://..."
             className="max-w-md"
           />
-          <Button type="submit" disabled={isLoading} className={cn("h-10 space-x-1", { loading: isLoading })}>
+          <Button type="submit" disabled={isLoading} className={cn("h-9 gap-1", { loading: isLoading })}>
             <Plus size={18} />
             <span>Add</span>
           </Button>
