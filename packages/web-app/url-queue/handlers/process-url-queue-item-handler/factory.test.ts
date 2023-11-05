@@ -2,7 +2,7 @@
 // Mock needs to go first.
 import { prismaMock } from "@urlshare/db/prisma/prisma-mock";
 /* eslint-enable simple-import-sort/imports */
-import { UrlQueueStatus } from "@urlshare/db/prisma/client";
+import { UrlQueue, UrlQueueStatus } from "@urlshare/db/prisma/client";
 import { sha1 } from "@urlshare/crypto/sha1";
 import { ID_PLACEHOLDER_REPLACED_BY_ID_GENERATOR } from "@urlshare/db/prisma/middlewares/generate-model-id";
 import { Logger } from "@urlshare/logger";
@@ -23,6 +23,9 @@ import { createUserUrl } from "../../../user-url/fixtures/create-user-url.fixtur
 import { createUrlQueueItem } from "../../test/fixtures/url-queue";
 import { generateUrlQueueId } from "../../utils/generate-url-queue-id";
 import { processUrlQueueItemHandlerFactory } from "./factory";
+import { Metadata } from "@urlshare/metadata/types";
+import { generateCategoryId } from "../../../category/utils/generate-category-id";
+import { createCategory } from "../../../category/fixtures/create-category.fixture";
 
 const fetchMetadata = vi.fn();
 
@@ -36,6 +39,9 @@ const reqMock = mockDeep<NextApiRequest>();
 const resMock = mockDeep<NextApiResponse>();
 
 const maxNumberOfAttempts = 5;
+const url = "https://urlshare.app/about";
+let metadata: Metadata;
+let urlQueueItem: UrlQueue;
 
 describe("processQueueItemHandler", () => {
   beforeEach(() => {
@@ -47,8 +53,11 @@ describe("processQueueItemHandler", () => {
 
     vi.resetAllMocks();
 
-    prismaMock.urlQueue.findFirst.mockResolvedValue(createUrlQueueItem());
-    fetchMetadata.mockResolvedValue(createExampleWebsiteMetadata());
+    urlQueueItem = createUrlQueueItem();
+    metadata = createExampleWebsiteMetadata({ url });
+
+    prismaMock.urlQueue.findFirst.mockResolvedValue(urlQueueItem);
+    fetchMetadata.mockResolvedValue(metadata);
 
     reqMock.headers = { authorization: `Bearer ${urlQueueApiKey}` };
     reqMock.body = { urlQueueId };
@@ -67,6 +76,8 @@ describe("processQueueItemHandler", () => {
         attemptCount: true,
         rawUrl: true,
         userId: true,
+        metadata: true,
+        categoryIds: true,
       },
       where: {
         status: {
@@ -77,7 +88,7 @@ describe("processQueueItemHandler", () => {
     });
   });
 
-  describe("when no such item is found", () => {
+  describe("when no url queue item is found", () => {
     beforeEach(() => {
       prismaMock.urlQueue.findFirst.mockResolvedValue(null);
     });
@@ -108,7 +119,7 @@ describe("processQueueItemHandler", () => {
     });
   });
 
-  it("fetches the metadata for the URL in question", async () => {
+  it("fetches the metadata for the url queue item", async () => {
     const urlQueueItem = createUrlQueueItem({ id: urlQueueId });
     prismaMock.urlQueue.findFirstOrThrow.mockResolvedValue(urlQueueItem);
 
@@ -119,39 +130,9 @@ describe("processQueueItemHandler", () => {
     expect(fetchMetadata).toHaveBeenCalledWith(urlQueueItem.rawUrl);
   });
 
-  describe("when metadata contains URL and it differs from the raw URL in url queue item", () => {
-    const url = "https://urlshare.app/about";
-    const metadata = createExampleWebsiteMetadata({ url });
-    const urlQueueEntry = createUrlQueueItem({ rawUrl: url + "#faq" });
-
-    beforeEach(() => {
-      fetchMetadata.mockResolvedValue(metadata);
-      prismaMock.urlQueue.findFirstOrThrow.mockResolvedValue(urlQueueEntry);
-    });
-
-    it("should check if an entry for that URL exist", async () => {
-      const handler = processUrlQueueItemHandlerFactory({ fetchMetadata, logger, maxNumberOfAttempts });
-      await handler(reqMock, resMock);
-
-      expect(prismaMock.url.findUnique).toHaveBeenCalledWith({
-        where: {
-          urlHash: sha1(metadata.url as string), // I know `url` is there
-        },
-      });
-    });
-  });
-
   describe("when fetching metadata fails", () => {
     beforeEach(() => {
       fetchMetadata.mockRejectedValueOnce(new Error("Something went wrong with fetching metadata"));
-    });
-
-    it("should respond with NO_CONTENT status", async () => {
-      const handler = processUrlQueueItemHandlerFactory({ fetchMetadata, logger, maxNumberOfAttempts });
-
-      await handler(reqMock, resMock);
-
-      expect(resMock.status).toHaveBeenCalledWith(StatusCodes.NO_CONTENT);
     });
 
     describe("when this was a final attempt to process the item in the queue", () => {
@@ -161,7 +142,7 @@ describe("processQueueItemHandler", () => {
         prismaMock.urlQueue.findFirst.mockResolvedValue(urlQueueItemWithSecondToLastAttempt);
       });
 
-      it("should change the status of this item to REJECTED", async () => {
+      it("should mark the queue item as REJECTED", async () => {
         const handler = processUrlQueueItemHandlerFactory({ fetchMetadata, logger, maxNumberOfAttempts });
 
         await handler(reqMock, resMock);
@@ -174,6 +155,63 @@ describe("processQueueItemHandler", () => {
             id: urlQueueItemWithSecondToLastAttempt.id,
           },
         });
+      });
+    });
+
+    it("should respond with NO_CONTENT status", async () => {
+      const handler = processUrlQueueItemHandlerFactory({ fetchMetadata, logger, maxNumberOfAttempts });
+
+      await handler(reqMock, resMock);
+
+      expect(resMock.status).toHaveBeenCalledWith(StatusCodes.NO_CONTENT);
+    });
+  });
+
+  it("should use the url from metadata to check if Url already exists", async () => {
+    const handler = processUrlQueueItemHandlerFactory({ fetchMetadata, logger, maxNumberOfAttempts });
+    await handler(reqMock, resMock);
+
+    expect(prismaMock.url.findUnique).toHaveBeenCalledWith({
+      where: {
+        urlHash: sha1(metadata.url as string), // I know `url` is there
+      },
+    });
+  });
+
+  describe("when there is no url in metadata (e.g. this was an image, so no metadata could be fetched)", () => {
+    beforeEach(() => {
+      const imageMetadata = createExampleImageMetadata();
+      fetchMetadata.mockResolvedValue(imageMetadata);
+    });
+
+    it("should use the rawUrl property from queue item to check if Url exists", async () => {
+      const handler = processUrlQueueItemHandlerFactory({ fetchMetadata, logger, maxNumberOfAttempts });
+      await handler(reqMock, resMock);
+
+      expect(prismaMock.url.findUnique).toHaveBeenCalledWith({
+        where: {
+          urlHash: sha1(urlQueueItem.rawUrl),
+        },
+      });
+    });
+  });
+
+  describe("when Url does not exist yet", async () => {
+    beforeEach(() => {
+      prismaMock.url.findUnique.mockResolvedValue(null);
+    });
+
+    it("should create a new Url entry", async () => {
+      const handler = processUrlQueueItemHandlerFactory({ fetchMetadata, logger, maxNumberOfAttempts });
+      await handler(reqMock, resMock);
+
+      expect(prismaMock.url.create).toHaveBeenCalledWith({
+        data: {
+          id: ID_PLACEHOLDER_REPLACED_BY_ID_GENERATOR,
+          url,
+          urlHash: sha1(metadata.url as string),
+          metadata: compressMetadata(metadata),
+        },
       });
     });
   });
@@ -197,146 +235,7 @@ describe("processQueueItemHandler", () => {
       prismaMock.userUrl.create.mockResolvedValue(userUrlItem);
     });
 
-    describe("when the url in metadata differs from the raw one, from queue (e.g. canonical URL is different)", () => {
-      const url = "https://urlshare.app/about";
-      const metadata = createExampleWebsiteMetadata({ url });
-      const urlQueueEntry = createUrlQueueItem({ rawUrl: url + "#faq" });
-
-      describe("when such url exists already in the DB", () => {
-        const existingUrlEntity = createUrlEntity({ url });
-
-        beforeEach(() => {
-          fetchMetadata.mockResolvedValue(metadata);
-          prismaMock.urlQueue.findFirstOrThrow.mockResolvedValue(urlQueueEntry);
-          prismaMock.url.findUnique.mockResolvedValue(existingUrlEntity);
-        });
-
-        it("should not create a new URL entry (as it already exists)", async () => {
-          const handler = processUrlQueueItemHandlerFactory({ fetchMetadata, logger, maxNumberOfAttempts });
-          await handler(reqMock, resMock);
-
-          expect(prismaMock.$transaction).toHaveBeenCalled();
-
-          // Triggering $transaction call. Don't know if it can be done otherwise.
-          // TODO if it can
-          const transactionCallback = getTransactionCallback();
-          await transactionCallback(prismaMock);
-
-          expect(prismaMock.url.create).not.toHaveBeenCalled();
-        });
-
-        it("should use existing url entry for adding relationship between that url and user that added it", async () => {
-          const handler = processUrlQueueItemHandlerFactory({ fetchMetadata, logger, maxNumberOfAttempts });
-          await handler(reqMock, resMock);
-
-          expect(prismaMock.$transaction).toHaveBeenCalled();
-
-          // Triggering $transaction call. Don't know if it can be done otherwise.
-          // TODO if it can
-          const transactionCallback = getTransactionCallback();
-          await transactionCallback(prismaMock);
-
-          expect(prismaMock.userUrl.create).toHaveBeenCalledWith({
-            data: {
-              id: ID_PLACEHOLDER_REPLACED_BY_ID_GENERATOR,
-              userId: urlQueueItem.userId,
-              urlId: existingUrlEntity.id,
-            },
-          });
-        });
-
-        it("should increment the number of urls for the user that added it", async () => {
-          const handler = processUrlQueueItemHandlerFactory({ fetchMetadata, logger, maxNumberOfAttempts });
-          await handler(reqMock, resMock);
-
-          expect(prismaMock.$transaction).toHaveBeenCalled();
-
-          // Triggering $transaction call. Don't know if it can be done otherwise.
-          // TODO if it can
-          const transactionCallback = getTransactionCallback();
-          await transactionCallback(prismaMock);
-
-          expect(prismaMock.userProfileData.update).toHaveBeenCalledWith({
-            data: {
-              urlsCount: {
-                increment: 1,
-              },
-            },
-            where: {
-              userId: urlQueueItem.userId,
-            },
-          });
-        });
-      });
-    });
-
-    describe("when the url in metadata is the same as the raw one, from queue", () => {
-      const url = "https://urlshare.app/about";
-      const metadata = createExampleWebsiteMetadata({ url });
-      const urlQueueEntry = createUrlQueueItem({ rawUrl: url });
-
-      beforeEach(() => {
-        fetchMetadata.mockResolvedValue(metadata);
-
-        prismaMock.urlQueue.findFirstOrThrow.mockResolvedValue(urlQueueEntry);
-      });
-
-      it("should create Url entity, as it doesn't exist yet", async () => {
-        const handler = processUrlQueueItemHandlerFactory({ fetchMetadata, logger, maxNumberOfAttempts });
-        await handler(reqMock, resMock);
-
-        expect(prismaMock.$transaction).toHaveBeenCalled();
-
-        // Triggering $transaction call. Don't know if it can be done otherwise.
-        // TODO if it can
-        const transactionCallback = getTransactionCallback();
-        await transactionCallback(prismaMock);
-
-        const expectedPayload = {
-          data: {
-            id: ID_PLACEHOLDER_REPLACED_BY_ID_GENERATOR,
-            url: metadata.url,
-            urlHash: sha1(metadata.url as string),
-            metadata: compressMetadata(metadata),
-          },
-        };
-
-        expect(prismaMock.url.create).toHaveBeenCalledWith(expectedPayload);
-      });
-    });
-
-    describe('if metadata doesn\'t contain "url" property (e.g. it was an image, metadata was not obtained)', () => {
-      const exampleImageMetadata = createExampleImageMetadata();
-
-      beforeEach(() => {
-        fetchMetadata.mockResolvedValue(exampleImageMetadata);
-      });
-
-      it("should use rawUrl for payload creation", async () => {
-        const handler = processUrlQueueItemHandlerFactory({ fetchMetadata, logger, maxNumberOfAttempts });
-        await handler(reqMock, resMock);
-
-        expect(prismaMock.$transaction).toHaveBeenCalled();
-
-        // Triggering $transaction call. Don't know if it can be done otherwise.
-        // TODO if it can
-        const transactionCallback = getTransactionCallback();
-        await transactionCallback(prismaMock);
-
-        const expectedPayload = {
-          data: {
-            id: ID_PLACEHOLDER_REPLACED_BY_ID_GENERATOR,
-            url: urlQueueItem.rawUrl,
-            urlHash: sha1(urlQueueItem.rawUrl),
-            metadata: compressMetadata(exampleImageMetadata),
-          },
-        };
-
-        expect(prismaMock.url.create).toHaveBeenCalledWith(expectedPayload);
-      });
-    });
-
-    it("relationship between created url and user that added it is created", async () => {
+    it("should create relationship (UserUrl) between the Url and the user that added it", async () => {
       const handler = processUrlQueueItemHandlerFactory({ fetchMetadata, logger, maxNumberOfAttempts });
       await handler(reqMock, resMock);
 
@@ -356,7 +255,178 @@ describe("processQueueItemHandler", () => {
       });
     });
 
-    it("adds the user's url to the feed queue (so that it will appear on author's feed as well)", async () => {
+    describe("when the url was added with categories", () => {
+      const categoryIds = [generateCategoryId(), generateCategoryId()];
+      const categories = categoryIds.map((id) => createCategory({ id }));
+      const urlQueueItem = createUrlQueueItem({ categoryIds });
+
+      beforeEach(() => {
+        prismaMock.urlQueue.findFirst.mockResolvedValue(urlQueueItem);
+        prismaMock.category.findMany.mockResolvedValue(categories);
+      });
+
+      it("should fetch current user categories", async () => {
+        const handler = processUrlQueueItemHandlerFactory({ fetchMetadata, logger, maxNumberOfAttempts });
+        await handler(reqMock, resMock);
+
+        expect(prismaMock.$transaction).toHaveBeenCalled();
+
+        const transactionCallback = getTransactionCallback();
+        await transactionCallback(prismaMock);
+
+        expect(prismaMock.category.findMany).toHaveBeenCalledWith({
+          where: {
+            userId: urlQueueItem.userId,
+          },
+          select: {
+            id: true,
+          },
+        });
+      });
+
+      it("should assign each category to the url", async () => {
+        const handler = processUrlQueueItemHandlerFactory({ fetchMetadata, logger, maxNumberOfAttempts });
+        await handler(reqMock, resMock);
+
+        expect(prismaMock.$transaction).toHaveBeenCalled();
+
+        const transactionCallback = getTransactionCallback();
+        await transactionCallback(prismaMock);
+
+        expect(prismaMock.userUrlCategory.createMany).toHaveBeenCalledWith({
+          data: categoryIds.map((categoryId) => {
+            return {
+              categoryId,
+              userUrlId: userUrlItem.id,
+            };
+          }),
+        });
+      });
+
+      it("should increment urls count on each category", async () => {
+        const handler = processUrlQueueItemHandlerFactory({ fetchMetadata, logger, maxNumberOfAttempts });
+        await handler(reqMock, resMock);
+
+        expect(prismaMock.$transaction).toHaveBeenCalled();
+
+        const transactionCallback = getTransactionCallback();
+        await transactionCallback(prismaMock);
+
+        expect(prismaMock.category.updateMany).toHaveBeenCalledWith({
+          data: {
+            urlsCount: {
+              increment: 1,
+            },
+          },
+          where: {
+            id: {
+              in: categoryIds,
+            },
+          },
+        });
+      });
+
+      describe("when user has no categories (e.g. they were removed before queue item got processed)", () => {
+        beforeEach(() => {
+          prismaMock.category.findMany.mockResolvedValue([]);
+        });
+
+        it("should not perform any categories related action", async () => {
+          const handler = processUrlQueueItemHandlerFactory({ fetchMetadata, logger, maxNumberOfAttempts });
+          await handler(reqMock, resMock);
+
+          expect(prismaMock.$transaction).toHaveBeenCalled();
+
+          const transactionCallback = getTransactionCallback();
+          await transactionCallback(prismaMock);
+
+          expect(prismaMock.userUrlCategory.createMany).not.toHaveBeenCalled();
+          expect(prismaMock.category.updateMany).not.toHaveBeenCalled();
+        });
+      });
+
+      describe("when some category IDs are not present in user's categories (e.g. category was removed before queue item got processed)", () => {
+        const categoryId1 = generateCategoryId();
+        const categoryId2 = generateCategoryId();
+
+        const categoryIds = [categoryId1, categoryId2];
+
+        const categories = [createCategory({ id: categoryId1 })];
+        const urlQueueItem = createUrlQueueItem({ categoryIds });
+
+        beforeEach(() => {
+          prismaMock.urlQueue.findFirst.mockResolvedValue(urlQueueItem);
+          prismaMock.category.findMany.mockResolvedValue(categories);
+        });
+
+        it("should assign categories to the url, but only those that user currently has", async () => {
+          const handler = processUrlQueueItemHandlerFactory({ fetchMetadata, logger, maxNumberOfAttempts });
+          await handler(reqMock, resMock);
+
+          expect(prismaMock.$transaction).toHaveBeenCalled();
+
+          const transactionCallback = getTransactionCallback();
+          await transactionCallback(prismaMock);
+
+          expect(prismaMock.userUrlCategory.createMany).toHaveBeenCalledWith({
+            data: [categoryId1].map((categoryId) => {
+              return {
+                categoryId,
+                userUrlId: userUrlItem.id,
+              };
+            }),
+          });
+        });
+
+        it("should increment urls count on categories, but only those that user currently has", async () => {
+          const handler = processUrlQueueItemHandlerFactory({ fetchMetadata, logger, maxNumberOfAttempts });
+          await handler(reqMock, resMock);
+
+          expect(prismaMock.$transaction).toHaveBeenCalled();
+
+          const transactionCallback = getTransactionCallback();
+          await transactionCallback(prismaMock);
+
+          expect(prismaMock.category.updateMany).toHaveBeenCalledWith({
+            data: {
+              urlsCount: {
+                increment: 1,
+              },
+            },
+            where: {
+              id: {
+                in: [categoryId1],
+              },
+            },
+          });
+        });
+      });
+    });
+
+    it("should increment the number of urls for the user that added it", async () => {
+      const handler = processUrlQueueItemHandlerFactory({ fetchMetadata, logger, maxNumberOfAttempts });
+      await handler(reqMock, resMock);
+
+      expect(prismaMock.$transaction).toHaveBeenCalled();
+
+      // Triggering $transaction call. Don't know if it can be done otherwise.
+      // TODO if it can
+      const transactionCallback = getTransactionCallback();
+      await transactionCallback(prismaMock);
+
+      expect(prismaMock.userProfileData.update).toHaveBeenCalledWith({
+        data: {
+          urlsCount: {
+            increment: 1,
+          },
+        },
+        where: {
+          userId: urlQueueItem.userId,
+        },
+      });
+    });
+
+    it("should create FeedQueue entry", async () => {
       const handler = processUrlQueueItemHandlerFactory({ fetchMetadata, logger, maxNumberOfAttempts });
       await handler(reqMock, resMock);
 
@@ -376,7 +446,7 @@ describe("processQueueItemHandler", () => {
       });
     });
 
-    it("url in queue is marked as accepted (no future processing; entity can be deleted by separate job)", async () => {
+    it("should mark the queue item as ACCEPTED (no future processing)", async () => {
       const handler = processUrlQueueItemHandlerFactory({ fetchMetadata, logger, maxNumberOfAttempts });
       await handler(reqMock, resMock);
 
