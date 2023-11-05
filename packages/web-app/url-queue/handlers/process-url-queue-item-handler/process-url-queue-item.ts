@@ -1,5 +1,7 @@
+import { UserUrl } from "@prisma/client";
+import { DefaultArgs } from "@prisma/client/runtime/library";
 import { sha1 } from "@urlshare/crypto/sha1";
-import { Prisma, prisma, Url, UrlQueueStatus } from "@urlshare/db/prisma/client";
+import { Prisma, prisma, PrismaClient, Url, UrlQueue, UrlQueueStatus } from "@urlshare/db/prisma/client";
 import { ID_PLACEHOLDER_REPLACED_BY_ID_GENERATOR } from "@urlshare/db/prisma/middlewares/generate-model-id";
 import { Logger } from "@urlshare/logger";
 import { compressMetadata } from "@urlshare/metadata/compression";
@@ -15,6 +17,10 @@ interface Params {
 
 type NoItemsInQueue = null;
 type ProcessUrlQueueItem = (params: Params) => Promise<Url | NoItemsInQueue>;
+type TransactionPrismaClient = Omit<
+  PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>,
+  "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends"
+>;
 
 export const actionType = "processUrlQueueItemHandler";
 
@@ -30,6 +36,8 @@ export const processUrlQueueItem: ProcessUrlQueueItem = async ({
       attemptCount: true,
       rawUrl: true,
       userId: true,
+      metadata: true,
+      categoryIds: true,
     },
     where: {
       status: {
@@ -39,39 +47,24 @@ export const processUrlQueueItem: ProcessUrlQueueItem = async ({
     orderBy: [{ status: "desc" }, { createdAt: "desc" }, { attemptCount: "desc" }],
   });
 
-  if (!urlQueueItem) {
-    // Queue is empty
+  const queueIsEmpty = !urlQueueItem;
+
+  if (queueIsEmpty) {
     return null;
   }
 
-  await prisma.urlQueue.update({
-    data: {
-      attemptCount: urlQueueItem.attemptCount + 1,
-    },
-    where: {
-      id: urlQueueItem.id,
-    },
-  });
+  await increaseAttemptCount(urlQueueItem);
 
+  const urlQueueId = urlQueueItem.id;
   let metadata: Metadata;
 
   try {
-    metadata = await fetchMetadata(urlQueueItem.rawUrl);
+    metadata = await getOrFetchMetadata({ urlQueueItem, fetchMetadata });
   } catch (_) {
     if (urlQueueItem.attemptCount + 1 >= maxNumberOfAttempts) {
-      logger.error(
-        { requestId, actionType, urlQueueItemId: urlQueueItem.id },
-        "Final attempt reached, rejecting URL queue item."
-      );
+      logger.error({ requestId, actionType, urlQueueId }, "Final attempt reached, rejecting URL queue item.");
 
-      await prisma.urlQueue.update({
-        data: {
-          status: UrlQueueStatus.REJECTED,
-        },
-        where: {
-          id: urlQueueItem.id,
-        },
-      });
+      await markUrlQueueAsRejected(urlQueueId);
     }
 
     return null;
@@ -79,71 +72,217 @@ export const processUrlQueueItem: ProcessUrlQueueItem = async ({
 
   logger.info({ requestId, actionType, metadata }, "Metadata fetched.");
 
-  const url = metadata.url || urlQueueItem.rawUrl;
-  const urlHash = sha1(url);
-  const compressedMetadata = compressMetadata(metadata);
+  const urlEntry: Url = await getOrCreateUrl({ metadata, rawUrl: urlQueueItem.rawUrl });
 
-  let urlEntry: Url | null = null;
+  const urlId = urlEntry.id;
+  const userId = urlQueueItem.userId;
+  const categoryIds = urlQueueItem.categoryIds as Prisma.JsonArray;
 
-  if (metadata.url !== urlQueueItem.rawUrl) {
-    urlEntry = await prisma.url.findUnique({
-      where: { urlHash },
-    });
+  await prisma.$transaction(async (tx) => {
+    const { id: userUrlId } = await createUserUrl(tx, { userId, urlId });
+
+    if (categoryIds.length > 0) {
+      await attachCategoriesToUrl(tx, { userId, userUrlId, categoryIds });
+    }
+
+    await incrementUserUrlsCount(tx, { userId });
+    await createFeedQueueEntry(tx, { userId, userUrlId });
+    await markUrlQueueAsAccepted(tx, { urlQueueId: urlQueueItem.id, metadata });
+
+    logger.info({ requestId, actionType, createdUrlId: urlId }, "Processing finished, URL created.");
+  });
+
+  return urlEntry;
+};
+
+const increaseAttemptCount = async ({ id, attemptCount }: Pick<UrlQueue, "id" | "attemptCount">) => {
+  await prisma.urlQueue.update({
+    data: {
+      attemptCount: attemptCount + 1,
+    },
+    where: {
+      id,
+    },
+  });
+};
+
+const getOrFetchMetadata = async ({
+  urlQueueItem,
+  fetchMetadata,
+}: {
+  urlQueueItem: Pick<UrlQueue, "rawUrl" | "metadata">;
+  fetchMetadata: FetchMetadata;
+}): Promise<Metadata> => {
+  // I know it's Metadata
+  if (Object.keys(urlQueueItem.metadata as Metadata).length > 0) {
+    return urlQueueItem.metadata as Metadata;
   }
 
-  const urlEntryCreated = await prisma.$transaction(async (prisma) => {
-    if (!urlEntry) {
-      urlEntry = await prisma.url.create({
+  return await fetchMetadata(urlQueueItem.rawUrl);
+};
+
+const markUrlQueueAsRejected = async (urlQueueId: UrlQueue["id"]) => {
+  await prisma.urlQueue.update({
+    data: {
+      status: UrlQueueStatus.REJECTED,
+    },
+    where: {
+      id: urlQueueId,
+    },
+  });
+};
+
+const createUserUrl = async (
+  prisma: TransactionPrismaClient,
+  {
+    userId,
+    urlId,
+  }: {
+    userId: UrlQueue["userId"];
+    urlId: Url["id"];
+  }
+): Promise<UserUrl> => {
+  return prisma.userUrl.create({
+    data: {
+      id: ID_PLACEHOLDER_REPLACED_BY_ID_GENERATOR,
+      userId,
+      urlId,
+    },
+  });
+};
+
+const attachCategoriesToUrl = async (
+  prisma: TransactionPrismaClient,
+  {
+    userId,
+    categoryIds,
+    userUrlId,
+  }: {
+    userId: UrlQueue["userId"];
+    categoryIds: Prisma.JsonArray;
+    userUrlId: UserUrl["id"];
+  }
+) => {
+  // At this point I know the categories had been checked in terms of them being part of user's categories.
+  // The only check that needs to be done is if any of the categories had been deleted in the meanwhile.
+  // If so, those need to be skipped and only existing ones should be used.
+
+  const userCategoryIds = await prisma.category
+    .findMany({
+      where: {
+        userId,
+      },
+      select: {
+        id: true,
+      },
+    })
+    .then((categories) => {
+      return categories.map(({ id }) => id);
+    });
+
+  if (userCategoryIds.length > 0) {
+    const categoryIdsToUse = categoryIds
+      .filter((id) => {
+        if (typeof id === "string") {
+          return userCategoryIds.indexOf(id) !== -1;
+        }
+
+        return false;
+      })
+      .map((categoryId) => String(categoryId));
+
+    if (categoryIdsToUse.length > 0) {
+      await prisma.userUrlCategory.createMany({
+        data: categoryIdsToUse.map((categoryId) => {
+          return {
+            categoryId,
+            userUrlId,
+          };
+        }),
+      });
+
+      await prisma.category.updateMany({
         data: {
-          id: ID_PLACEHOLDER_REPLACED_BY_ID_GENERATOR,
-          url,
-          urlHash,
-          metadata: compressedMetadata as Prisma.JsonObject,
+          urlsCount: {
+            increment: 1,
+          },
+        },
+        where: {
+          id: {
+            in: categoryIdsToUse,
+          },
         },
       });
     }
+  }
+};
 
-    const userUrl = await prisma.userUrl.create({
-      data: {
-        id: ID_PLACEHOLDER_REPLACED_BY_ID_GENERATOR,
-        userId: urlQueueItem.userId,
-        urlId: urlEntry.id,
+const incrementUserUrlsCount = async (prisma: TransactionPrismaClient, { userId }: { userId: UrlQueue["userId"] }) => {
+  await prisma.userProfileData.update({
+    data: {
+      urlsCount: {
+        increment: 1,
       },
-    });
+    },
+    where: {
+      userId,
+    },
+  });
+};
 
-    await prisma.userProfileData.update({
-      data: {
-        urlsCount: {
-          increment: 1,
-        },
-      },
-      where: {
-        userId: urlQueueItem.userId,
-      },
-    });
+const createFeedQueueEntry = async (
+  prisma: TransactionPrismaClient,
+  {
+    userId,
+    userUrlId,
+  }: {
+    userId: UrlQueue["userId"];
+    userUrlId: UserUrl["id"];
+  }
+) => {
+  await prisma.feedQueue.create({
+    data: {
+      id: ID_PLACEHOLDER_REPLACED_BY_ID_GENERATOR,
+      userId,
+      userUrlId,
+    },
+  });
+};
 
-    await prisma.feedQueue.create({
-      data: {
-        id: ID_PLACEHOLDER_REPLACED_BY_ID_GENERATOR,
-        userId: urlQueueItem.userId,
-        userUrlId: userUrl.id,
-      },
-    });
+const markUrlQueueAsAccepted = async (
+  prisma: TransactionPrismaClient,
+  { urlQueueId, metadata }: { urlQueueId: UrlQueue["id"]; metadata: Metadata }
+) => {
+  await prisma.urlQueue.update({
+    data: {
+      metadata: compressMetadata(metadata) as Prisma.JsonObject,
+      status: "ACCEPTED",
+    },
+    where: {
+      id: urlQueueId,
+    },
+  });
+};
 
-    await prisma.urlQueue.update({
-      data: {
-        metadata: compressedMetadata as Prisma.JsonObject,
-        status: "ACCEPTED",
-      },
-      where: {
-        id: urlQueueItem.id,
-      },
-    });
+const getOrCreateUrl = async ({ rawUrl, metadata }: { rawUrl: UrlQueue["rawUrl"]; metadata: Metadata }) => {
+  const url = metadata.url || rawUrl;
+  const urlHash = sha1(url);
+  const compressedMetadata = compressMetadata(metadata);
 
-    logger.info({ requestId, actionType, createdUrl: urlEntry }, "Processing finished, URL created.");
-
-    return urlEntry;
+  const urlEntry = await prisma.url.findUnique({
+    where: { urlHash },
   });
 
-  return urlEntryCreated;
+  if (urlEntry) {
+    return urlEntry;
+  }
+
+  return prisma.url.create({
+    data: {
+      id: ID_PLACEHOLDER_REPLACED_BY_ID_GENERATOR,
+      url,
+      urlHash,
+      metadata: compressedMetadata as Prisma.JsonObject,
+    },
+  });
 };
