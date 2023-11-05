@@ -13,6 +13,7 @@ const urlQueue: UrlQueue = {
   status: "NEW",
   attemptCount: 0,
   metadata: {},
+  categoryIds: [],
   userId: generateUserId(),
 };
 
