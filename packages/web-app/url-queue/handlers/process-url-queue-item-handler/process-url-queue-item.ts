@@ -8,6 +8,8 @@ import { compressMetadata } from "@urlshare/metadata/compression";
 import { FetchMetadata } from "@urlshare/metadata/fetch-metadata";
 import { Metadata } from "@urlshare/metadata/types";
 
+import { assignCategoriesToUserUrl, incrementUrlsCount } from "../../../category/prisma/operations";
+
 interface Params {
   fetchMetadata: FetchMetadata;
   logger: Logger;
@@ -188,27 +190,8 @@ const attachCategoriesToUrl = async (
       .map((categoryId) => String(categoryId));
 
     if (categoryIdsToUse.length > 0) {
-      await prisma.userUrlCategory.createMany({
-        data: categoryIdsToUse.map((categoryId) => {
-          return {
-            categoryId,
-            userUrlId,
-          };
-        }),
-      });
-
-      await prisma.category.updateMany({
-        data: {
-          urlsCount: {
-            increment: 1,
-          },
-        },
-        where: {
-          id: {
-            in: categoryIdsToUse,
-          },
-        },
-      });
+      await assignCategoriesToUserUrl(prisma, { categoryIds: categoryIdsToUse, userUrlId });
+      await incrementUrlsCount(prisma, { categoryIds: categoryIdsToUse });
     }
   }
 };

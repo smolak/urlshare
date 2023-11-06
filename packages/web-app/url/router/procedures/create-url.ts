@@ -3,6 +3,7 @@ import { sha1 } from "@urlshare/crypto/sha1";
 import { Url, UrlQueue } from "@urlshare/db/prisma/client";
 import { ID_PLACEHOLDER_REPLACED_BY_ID_GENERATOR } from "@urlshare/db/prisma/middlewares/generate-model-id";
 
+import { assignCategoriesToUserUrl, incrementUrlsCount } from "../../../category/prisma/operations";
 import { protectedProcedure } from "../../../trpc/server";
 import { createUrlSchema } from "./create-url.schema";
 
@@ -70,27 +71,8 @@ export const createUrl = protectedProcedure
           });
 
           if (categoryIds.length > 0) {
-            await tx.userUrlCategory.createMany({
-              data: categoryIds.map((categoryId) => {
-                return {
-                  categoryId,
-                  userUrlId: userUrl.id,
-                };
-              }),
-            });
-
-            await tx.category.updateMany({
-              data: {
-                urlsCount: {
-                  increment: 1,
-                },
-              },
-              where: {
-                id: {
-                  in: categoryIds,
-                },
-              },
-            });
+            await assignCategoriesToUserUrl(tx, { categoryIds, userUrlId: userUrl.id });
+            await incrementUrlsCount(tx, { categoryIds });
           }
 
           await tx.userProfileData.update({
