@@ -24,7 +24,7 @@ export const ExistingUserProfileDataForm = () => {
   const { route } = useRouter();
 
   return (
-    <div className="container mx-auto my-5 max-w-2xl px-0 sm:px-4">
+    <>
       {isLoading && (
         <div className="flex items-center justify-center p-10">
           <LoadingIndicator label="Loading user profile data..." />
@@ -38,7 +38,7 @@ export const ExistingUserProfileDataForm = () => {
           </p>
         </div>
       )}
-    </div>
+    </>
   );
 };
 

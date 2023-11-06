@@ -16,7 +16,9 @@ export const SettingsLayout: FC<SettingsLayoutProps> = ({ children, title }) => 
         <header>
           <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
         </header>
-        <main className="">{children}</main>
+        <main className="">
+          <div className="container mx-auto my-5 max-w-2xl px-0 sm:px-4">{children}</div>
+        </main>
       </section>
 
       <Footer />
