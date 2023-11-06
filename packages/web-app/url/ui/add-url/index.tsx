@@ -1,11 +1,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Category } from "@urlshare/db/prisma/client";
 import { Button } from "@urlshare/ui/design-system/ui/button";
 import { Input } from "@urlshare/ui/design-system/ui/input";
 import { cn } from "@urlshare/ui/utils";
 import { CheckCircle, Plus } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { FieldValues, useForm } from "react-hook-form";
 
+import { CategoryPicker } from "../../../category/ui/category-picker";
 import { api } from "../../../trpc/client";
 import { CreateUrlSchema, createUrlSchema } from "../../router/procedures/create-url.schema";
 
@@ -21,12 +23,15 @@ export const AddUrl = () => {
     resolver: zodResolver(createUrlSchema),
     mode: "onSubmit",
   });
+
   const [errorResponse, setErrorResponse] = useState("");
   const [addedUrl, setAddedUrl] = useState("");
+  const [selectedCategories, setSelectedCategories] = useState<Category["id"][]>([]);
+
   const { mutate: addUrl, isLoading } = api.url.createUrl.useMutation({
     onSuccess: (data) => {
       setAddedUrl(data.url);
-
+      setSelectedCategories([]);
       resetField("url");
       setFocus("url");
     },
@@ -55,12 +60,15 @@ export const AddUrl = () => {
     }
   }, [addedUrl, setAddedUrl]);
 
-  const onSubmit = (values: FieldValues) => {
-    setAddedUrl("");
-    const url = values.url as string;
+  const onSubmit = useCallback(
+    (values: FieldValues) => {
+      setAddedUrl("");
+      const url = values.url as string;
 
-    addUrl({ url });
-  };
+      addUrl({ url, categoryIds: selectedCategories });
+    },
+    [setAddedUrl, addUrl, selectedCategories]
+  );
 
   return (
     <div className="w-full">
@@ -81,6 +89,17 @@ export const AddUrl = () => {
               if (url === "") {
                 resetField("url");
               }
+            }}
+          />
+          <CategoryPicker
+            selectedCategories={selectedCategories}
+            onCategorySelectionChange={(categoryId) => {
+              const categoryListed = selectedCategories.indexOf(categoryId) !== -1;
+              const newSelection = categoryListed
+                ? selectedCategories.filter((id) => categoryId !== id)
+                : [...selectedCategories, categoryId];
+
+              setSelectedCategories(newSelection);
             }}
           />
           <Button type="submit" disabled={isLoading} className={cn("h-9 gap-1", { loading: isLoading })}>
