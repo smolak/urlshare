@@ -18,10 +18,35 @@ type CreateUrlResult = ExistingUrlResult | CreatedUrlQueueItemResult;
 
 export const createUrl = protectedProcedure
   .input(createUrlSchema)
-  .mutation<CreateUrlResult>(async ({ input: { url }, ctx: { logger, requestId, session, prisma } }) => {
+  .mutation<CreateUrlResult>(async ({ input: { url, categoryIds }, ctx: { logger, requestId, session, prisma } }) => {
     const path = "url.createUrl";
     const userId = session.user.id;
     const urlHash = sha1(url);
+
+    if (categoryIds.length > 0) {
+      // Check the existence of the categories
+      const myCategories = await prisma.category.findMany({
+        where: {
+          userId,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      categoryIds.forEach((categoryId) => {
+        const categoryNotFound = myCategories.find(({ id }) => id === categoryId) === undefined;
+
+        if (categoryNotFound) {
+          logger.error({ requestId, path, userId }, "User used not owned categories.");
+
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "You used one or more categories you don't have.",
+          });
+        }
+      });
+    }
 
     // Check if there's a record for this hash
     const maybeUrl = await prisma.url.findUnique({
@@ -35,8 +60,8 @@ export const createUrl = protectedProcedure
       if (maybeUrl) {
         // TODO: Perhaps IDEA#4
 
-        await prisma.$transaction(async (prisma) => {
-          const userUrl = await prisma.userUrl.create({
+        await prisma.$transaction(async (tx) => {
+          const userUrl = await tx.userUrl.create({
             data: {
               id: ID_PLACEHOLDER_REPLACED_BY_ID_GENERATOR,
               userId,
@@ -44,7 +69,31 @@ export const createUrl = protectedProcedure
             },
           });
 
-          await prisma.userProfileData.update({
+          if (categoryIds.length > 0) {
+            await tx.userUrlCategory.createMany({
+              data: categoryIds.map((categoryId) => {
+                return {
+                  categoryId,
+                  userUrlId: userUrl.id,
+                };
+              }),
+            });
+
+            await tx.category.updateMany({
+              data: {
+                urlsCount: {
+                  increment: 1,
+                },
+              },
+              where: {
+                id: {
+                  in: categoryIds,
+                },
+              },
+            });
+          }
+
+          await tx.userProfileData.update({
             data: {
               urlsCount: {
                 increment: 1,
@@ -55,7 +104,7 @@ export const createUrl = protectedProcedure
             },
           });
 
-          await prisma.feedQueue.create({
+          await tx.feedQueue.create({
             data: {
               id: ID_PLACEHOLDER_REPLACED_BY_ID_GENERATOR,
               userId,
@@ -77,6 +126,7 @@ export const createUrl = protectedProcedure
           rawUrl: url,
           rawUrlHash: urlHash,
           userId,
+          categoryIds,
         },
       });
 
