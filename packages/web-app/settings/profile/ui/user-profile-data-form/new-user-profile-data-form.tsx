@@ -53,7 +53,7 @@ export const NewUserProfileDataForm = () => {
    */
 
   return (
-    <div className="container mx-auto my-5 max-w-2xl px-0 sm:px-4">
+    <>
       {isChecking && (
         <div className="flex items-center justify-center">
           <p>Checking data...</p>
@@ -76,7 +76,7 @@ export const NewUserProfileDataForm = () => {
         </div>
       )}
       {exists === false && <UserProfileDataForm />}
-    </div>
+    </>
   );
 };
 
