@@ -1,4 +1,3 @@
-import { SessionUser } from "next-auth";
 import { FC, PropsWithChildren } from "react";
 
 import { Footer } from "../../ui/footer";
@@ -6,7 +5,6 @@ import { MainHeader } from "../../ui/main-header";
 
 interface SettingsLayoutProps extends PropsWithChildren {
   title: string;
-  user: SessionUser;
 }
 
 export const SettingsLayout: FC<SettingsLayoutProps> = ({ children, title }) => {
