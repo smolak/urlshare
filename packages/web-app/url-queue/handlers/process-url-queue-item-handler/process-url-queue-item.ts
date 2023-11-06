@@ -1,8 +1,8 @@
 import { UserUrl } from "@prisma/client";
-import { DefaultArgs } from "@prisma/client/runtime/library";
 import { sha1 } from "@urlshare/crypto/sha1";
-import { Prisma, prisma, PrismaClient, Url, UrlQueue, UrlQueueStatus } from "@urlshare/db/prisma/client";
+import { Prisma, prisma, Url, UrlQueue, UrlQueueStatus } from "@urlshare/db/prisma/client";
 import { ID_PLACEHOLDER_REPLACED_BY_ID_GENERATOR } from "@urlshare/db/prisma/middlewares/generate-model-id";
+import { TransactionPrismaClient } from "@urlshare/db/prisma/types";
 import { Logger } from "@urlshare/logger";
 import { compressMetadata } from "@urlshare/metadata/compression";
 import { FetchMetadata } from "@urlshare/metadata/fetch-metadata";
@@ -17,10 +17,6 @@ interface Params {
 
 type NoItemsInQueue = null;
 type ProcessUrlQueueItem = (params: Params) => Promise<Url | NoItemsInQueue>;
-type TransactionPrismaClient = Omit<
-  PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>,
-  "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends"
->;
 
 export const actionType = "processUrlQueueItemHandler";
 
