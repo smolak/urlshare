@@ -7,7 +7,7 @@ const SettingsProfile = () => {
 
   return (
     status === "authenticated" && (
-      <SettingsLayout title="Profile" user={session.user}>
+      <SettingsLayout title="Profile">
         <UserProfileDataForm userRole={session.user.role} />
       </SettingsLayout>
     )
