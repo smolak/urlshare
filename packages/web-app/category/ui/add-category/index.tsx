@@ -2,18 +2,21 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@urlshare/ui/design-system/ui/button";
 import { Input } from "@urlshare/ui/design-system/ui/input";
 import { cn } from "@urlshare/ui/utils";
-import { api } from "@urlshare/web-app/trpc/client";
 import { Plus } from "lucide-react";
 import React, { FC, useEffect, useState } from "react";
 import { FieldValues, useForm } from "react-hook-form";
 
+import { api } from "../../../trpc/client";
 import { CreateCategorySchema, createCategorySchema } from "../../router/procedures/create-category.schema";
+
+type Size = "default" | "small";
 
 type AddCategoryProps = {
   onCategoryAdd: () => void;
+  size?: Size;
 };
 
-export const AddCategory: FC<AddCategoryProps> = ({ onCategoryAdd }) => {
+export const AddCategory: FC<AddCategoryProps> = ({ onCategoryAdd, size = "default" }) => {
   const [errorResponse, setErrorResponse] = useState("");
   const {
     setFocus,
@@ -28,6 +31,7 @@ export const AddCategory: FC<AddCategoryProps> = ({ onCategoryAdd }) => {
   });
   const { mutate: addCategory, isLoading } = api.category.createCategory.useMutation({
     onSuccess: () => {
+      setErrorResponse("");
       resetField("name");
       onCategoryAdd();
     },
@@ -49,7 +53,7 @@ export const AddCategory: FC<AddCategoryProps> = ({ onCategoryAdd }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <form onSubmit={handleSubmit(onSubmit)} id="categories">
       <div className="flex items-center gap-2">
         <Input
           {...register("name")}
@@ -65,8 +69,14 @@ export const AddCategory: FC<AddCategoryProps> = ({ onCategoryAdd }) => {
               resetField("name");
             }
           }}
+          className={cn({ "h-8": size === "small" })}
         />
-        <Button type="submit" disabled={isLoading} className={cn("h-9 gap-1", { loading: isLoading })}>
+        <Button
+          type="submit"
+          form="categories"
+          disabled={isLoading}
+          className={cn("h-9 gap-1", { loading: isLoading, "h-8": size === "small" })}
+        >
           <Plus size={18} />
           <span>Add</span>
         </Button>
