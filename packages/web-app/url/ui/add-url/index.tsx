@@ -41,10 +41,6 @@ export const AddUrl = () => {
   });
 
   useEffect(() => {
-    setFocus("url");
-  }, [setFocus]);
-
-  useEffect(() => {
     if (errorResponse !== "") {
       setFocus("url");
     }
@@ -71,16 +67,15 @@ export const AddUrl = () => {
   );
 
   return (
-    <div className="w-full">
-      <form onSubmit={handleSubmit(onSubmit)} className="relative">
-        <div className="flex items-center gap-2">
+    <section className="w-full">
+      <div className="flex items-center gap-2">
+        <form onSubmit={handleSubmit(onSubmit)} id="add-url" className="grow">
           <Input
             {...register("url")}
             type="url"
             inputMode="url"
             disabled={isLoading}
             placeholder="https://..."
-            className="max-w-md"
             onBlur={() => {
               setErrorResponse("");
 
@@ -91,39 +86,39 @@ export const AddUrl = () => {
               }
             }}
           />
-          <CategoryPicker
-            selectedCategories={selectedCategories}
-            onCategorySelectionChange={(categoryId) => {
-              const categoryListed = selectedCategories.indexOf(categoryId) !== -1;
-              const newSelection = categoryListed
-                ? selectedCategories.filter((id) => categoryId !== id)
-                : [...selectedCategories, categoryId];
+        </form>
+        <CategoryPicker
+          selectedCategories={selectedCategories}
+          onCategorySelectionChange={(categoryId) => {
+            const categoryListed = selectedCategories.indexOf(categoryId) !== -1;
+            const newSelection = categoryListed
+              ? selectedCategories.filter((id) => categoryId !== id)
+              : [...selectedCategories, categoryId];
 
-              setSelectedCategories(newSelection);
-            }}
-          />
-          <Button type="submit" disabled={isLoading} className={cn("h-9 gap-1", { loading: isLoading })}>
-            <Plus size={18} />
-            <span>Add</span>
-          </Button>
-        </div>
-        {errors?.url?.message || errorResponse !== "" ? (
-          <p className="absolute mt-1 rounded rounded-md bg-red-50 px-2 py-1 text-sm text-red-600">
-            {errors?.url?.message || errorResponse}
-          </p>
-        ) : null}
-        {addedUrl !== "" && (
-          <p
-            className="absolute mt-1 rounded rounded-md bg-green-50 px-2 py-1 text-sm text-green-600"
-            onClick={() => setAddedUrl("")}
-          >
-            <span className="flex items-center gap-2">
-              <CheckCircle size={13} />
-              <span>URL added. It will be live soon.</span>
-            </span>
-          </p>
-        )}
-      </form>
-    </div>
+            setSelectedCategories(newSelection);
+          }}
+        />
+        <Button form="add-url" type="submit" disabled={isLoading} className={cn("h-9 gap-1", { loading: isLoading })}>
+          <Plus size={18} />
+          <span>Add</span>
+        </Button>
+      </div>
+      {errors?.url?.message || errorResponse !== "" ? (
+        <p className="absolute mt-1 rounded rounded-md bg-red-50 px-2 py-1 text-sm text-red-600">
+          {errors?.url?.message || errorResponse}
+        </p>
+      ) : null}
+      {addedUrl !== "" && (
+        <p
+          className="absolute mt-1 rounded rounded-md bg-green-50 px-2 py-1 text-sm text-green-600"
+          onClick={() => setAddedUrl("")}
+        >
+          <span className="flex items-center gap-2">
+            <CheckCircle size={13} />
+            <span>URL added. It will be live soon.</span>
+          </span>
+        </p>
+      )}
+    </section>
   );
 };

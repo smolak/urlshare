@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@urlshare/ui/design-system/ui/input";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@urlshare/ui/design-system/ui/tooltip";
 import { cn } from "@urlshare/ui/utils";
 import { Save } from "lucide-react";
 import React, { FC, useEffect, useState } from "react";
@@ -81,15 +82,33 @@ export const EditCategory: FC<EditCategoryProps> = ({ category, onSave, onCancel
             }
           }}
         />
-        <div className="flex">
+        <div className="flex text-gray-600">
           {isLoading ? (
             <ActionPending />
           ) : (
-            <SubmitButton isSubmitting={isLoading}>
-              <Save size={14} />
-            </SubmitButton>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <SubmitButton isSubmitting={isLoading} className="group hover:bg-green-100">
+                    <Save size={14} className="group-hover:text-green-600" />
+                  </SubmitButton>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Save changes.</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           )}
-          <CancelAction actionPending={isLoading} onCancelAction={onCancel} />
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <CancelAction actionPending={isLoading} onCancelAction={onCancel} />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Discard changes.</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
 
         <Input {...register("id")} type="hidden" />

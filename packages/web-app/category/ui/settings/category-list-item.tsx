@@ -1,5 +1,6 @@
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@urlshare/ui/design-system/ui/tooltip";
 import { Pencil, Trash2 } from "lucide-react";
-import { FC, useState } from "react";
+import React, { FC, useState } from "react";
 
 import { CategoryVM } from "../../types/category.vm";
 import { ActionButton } from "./action-button";
@@ -35,17 +36,35 @@ export const CategoryListItem: FC<CategoryListItemProps> = ({ category, onCatego
   }
 
   return (
-    <span className="hover:text-accent-foreground space-between border-1 flex h-[42px] items-center justify-between rounded-md border border-transparent px-1 transition-all hover:bg-gray-50">
+    <span className="space-between border-1 flex h-[42px] items-center justify-between rounded-md border border-transparent px-1 transition-all hover:bg-slate-50">
       <span className="w-full p-2" onDoubleClick={() => setState("edit")}>
         {categoryName}
       </span>
-      <span className="flex">
-        <ActionButton onClick={() => setState("edit")} className="hover:bg-blue-100">
-          <Pencil size={14} />
-        </ActionButton>
-        <ActionButton onClick={() => setState("delete")} className="hover:bg-red-100">
-          <Trash2 size={14} />
-        </ActionButton>
+      <span className="flex text-gray-600">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger>
+              <ActionButton onClick={() => setState("edit")} className="group hover:bg-sky-100">
+                <Pencil size={14} className="group-hover:text-sky-600" />
+              </ActionButton>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Edit category name.</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger>
+              <ActionButton onClick={() => setState("delete")} className="group hover:bg-red-100">
+                <Trash2 size={14} className="group-hover:text-red-600" />
+              </ActionButton>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Delete?</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </span>
     </span>
   );

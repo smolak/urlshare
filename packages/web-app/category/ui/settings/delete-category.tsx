@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@urlshare/ui/design-system/ui/input";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@urlshare/ui/design-system/ui/tooltip";
 import { cn } from "@urlshare/ui/utils";
 import { Info, Trash } from "lucide-react";
 import React, { FC, useCallback, useEffect, useState } from "react";
@@ -62,28 +63,47 @@ export const DeleteCategory: FC<EditCategoryProps> = ({ category, onDelete, onCa
 
   return (
     <form className="relative" onSubmit={handleSubmit(onSubmit)}>
-      <p className="absolute -top-8 rounded rounded-md bg-blue-50 px-2 py-1 text-sm text-blue-600">
+      <p className="absolute -top-8 rounded rounded-md border-l-4 border-sky-600 bg-sky-50 px-2 py-1 text-sm text-sky-600">
         <span className="flex items-center gap-2">
-          <Info size={13} /> No URLs will be removed with this operation.
+          <Info size={13} strokeWidth={2.5} />
+          <span className="font-light">No URLs will be removed with this operation.</span>
         </span>
       </p>
       <div
         className={cn(
-          "border-1 text-accent-foreground space-between flex h-[42px] items-center justify-between rounded-md border px-1 shadow shadow-sm transition-all",
+          "border-1 text-accent-foreground space-between flex h-[42px] items-center justify-between rounded-md border border-red-100 px-1 shadow shadow-sm transition-all",
           { "rounded-bl-none border-red-50": Boolean(errorResponse) }
         )}
       >
         <span className="w-full p-2">{category.name}</span>
 
-        <div className="flex">
+        <div className="flex text-gray-600">
           {isLoading ? (
             <ActionPending />
           ) : (
-            <SubmitButton isSubmitting={isLoading}>
-              <Trash size={14} />
-            </SubmitButton>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <SubmitButton isSubmitting={isLoading} className="group hover:bg-green-100">
+                    <Trash size={14} className="group-hover:text-green-600" />
+                  </SubmitButton>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Yes, delete!</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           )}
-          <CancelAction actionPending={isLoading} onCancelAction={onCancel} />
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <CancelAction actionPending={isLoading} onCancelAction={onCancel} />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>No, I changed my mind.</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
 
         <Input {...register("id")} type="hidden" />
