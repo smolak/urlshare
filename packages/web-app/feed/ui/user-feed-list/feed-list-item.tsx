@@ -72,7 +72,10 @@ export const FeedListItem: FC<FeedListItemProps> = ({ feedItem, interactions }) 
         <CardDescription>{url.metadata.description}</CardDescription>
       </CardContent>
       <CardFooter className="flex justify-between">
-        <div>{interactions}</div>
+        <div className="flex items-center gap-2">
+          <div>{interactions}</div>
+          <div className="text-sm font-light text-slate-400">{url.categoryNames.join(", ")}</div>
+        </div>
         <Link href={`/${user.username}`}>
           <UserImage username={user.username} image={user.image as string} size="small" />
         </Link>

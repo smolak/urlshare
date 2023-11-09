@@ -1,4 +1,4 @@
-import { Feed, Url, User, UserProfileData, UserUrl } from "@urlshare/db/prisma/client";
+import { Category, Feed, Url, User, UserProfileData, UserUrl } from "@urlshare/db/prisma/client";
 import { decompressMetadata } from "@urlshare/metadata/compression";
 import { Metadata } from "@urlshare/metadata/types";
 
@@ -17,6 +17,7 @@ export const toFeedVM = (entry: RawFeedEntry): FeedVM => {
       metadata: decompressMetadata(entry.url_metadata),
       likes: Number(entry.url_likes),
       liked: entry.feed_liked,
+      categoryNames: entry.category_names ? entry.category_names.split(",") : [],
     },
     userUrlId: entry.userUrl_id,
   };
@@ -36,6 +37,7 @@ export type FeedVM = {
     metadata: Metadata;
     liked: Feed["liked"];
     likes: UserUrl["likes"];
+    categoryNames: Category["name"][];
   };
   userUrlId: UserUrl["id"];
 };
