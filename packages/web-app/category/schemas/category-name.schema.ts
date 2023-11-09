@@ -11,4 +11,7 @@ export const categoryNameSchema = z
     (val) => ({
       message: `Category name too long. ${val.length} characters, max ${MAX_LENGTH}.`,
     })
-  );
+  )
+  .refine((val) => !val.includes(","), {
+    message: `Category name can't include comma "," character.`,
+  });
