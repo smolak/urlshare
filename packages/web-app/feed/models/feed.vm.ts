@@ -2,6 +2,7 @@ import { Category, Feed, Url, User, UserProfileData, UserUrl } from "@urlshare/d
 import { decompressMetadata } from "@urlshare/metadata/compression";
 import { Metadata } from "@urlshare/metadata/types";
 
+import { sortAZ } from "../../category/utils/sort-a-z";
 import { RawFeedEntry } from "../queries/get-user-feed";
 
 export const toFeedVM = (entry: RawFeedEntry): FeedVM => {
@@ -17,7 +18,7 @@ export const toFeedVM = (entry: RawFeedEntry): FeedVM => {
       metadata: decompressMetadata(entry.url_metadata),
       likes: Number(entry.url_likes),
       liked: entry.feed_liked,
-      categoryNames: entry.category_names ? entry.category_names.split(",") : [],
+      categoryNames: entry.category_names ? entry.category_names.split(",").sort(sortAZ) : [],
     },
     userUrlId: entry.userUrl_id,
   };
