@@ -4,6 +4,7 @@ import { CompressedMetadata } from "@urlshare/metadata/compression";
 import { FeedSourceValue } from "../ui/user-feed-source-selector/feed-source";
 
 export type RawFeedEntry = {
+  category_names: string | null;
   feed_id: Feed["id"];
   feed_createdAt: Feed["createdAt"];
   feed_liked: Feed["liked"];
@@ -26,10 +27,13 @@ const baseQuery = Prisma.sql`
       SELECT UserProfileData.username AS user_username, UserProfileData.image AS user_image,
         Feed.id AS feed_id, Feed.createdAt AS feed_createdAt, Feed.liked as feed_liked,
         Url.url AS url_url, Url.metadata AS url_metadata,
-        UserUrl.id AS userUrl_id, UserUrl.likes as url_likes
+        UserUrl.id AS userUrl_id, UserUrl.likes as url_likes,
+        GROUP_CONCAT(Category.name) AS category_names
       FROM Feed
       LEFT JOIN UserUrl ON Feed.userUrlId = UserUrl.id
       LEFT JOIN Url ON UserUrl.urlId = Url.id
+      LEFT JOIN UserUrlCategory ON UserUrl.id = UserUrlCategory.userUrlId
+      LEFT JOIN Category ON UserUrlCategory.categoryId = Category.id
       LEFT JOIN UserProfileData ON UserUrl.userId = UserProfileData.userId`;
 
 export const getUserFeedQuery = ({ userId, limit, cursor, feedSource }: GetUserFeedQueryOptions) => {
@@ -40,6 +44,7 @@ export const getUserFeedQuery = ({ userId, limit, cursor, feedSource }: GetUserF
           WHERE Feed.userId = ${userId}
             AND UserProfileData.userId = ${userId}
             AND Feed.createdAt < ${cursor}
+          GROUP BY Feed.id
           ORDER BY Feed.createdAt DESC
           LIMIT 0, ${limit}
       `;
@@ -49,6 +54,7 @@ export const getUserFeedQuery = ({ userId, limit, cursor, feedSource }: GetUserF
           ${baseQuery}
           WHERE Feed.userId = ${userId}
             AND Feed.createdAt < ${cursor}
+          GROUP BY Feed.id
           ORDER BY Feed.createdAt DESC
           LIMIT 0, ${limit}
       `;
@@ -59,6 +65,7 @@ export const getUserFeedQuery = ({ userId, limit, cursor, feedSource }: GetUserF
           ${baseQuery}
           WHERE Feed.userId = ${userId}
             AND UserProfileData.userId = ${userId}
+          GROUP BY Feed.id
           ORDER BY Feed.createdAt DESC
           LIMIT 0, ${limit}
       `;
@@ -67,6 +74,7 @@ export const getUserFeedQuery = ({ userId, limit, cursor, feedSource }: GetUserF
   return prisma.$queryRaw<ReadonlyArray<RawFeedEntry>>`
           ${baseQuery}
           WHERE Feed.userId = ${userId}
+          GROUP BY Feed.id
           ORDER BY Feed.createdAt DESC
           LIMIT 0, ${limit}
       `;
