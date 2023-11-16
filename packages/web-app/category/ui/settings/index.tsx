@@ -1,4 +1,6 @@
+import { User } from "@prisma/client";
 import { Lightbulb } from "lucide-react";
+import { FC } from "react";
 
 import { api } from "../../../trpc/client";
 import { AddCategory } from "../add-category";
@@ -6,8 +8,12 @@ import { CategoryList } from "./category-list";
 import { ErrorLoadingCategories } from "./error-loading-categories";
 import { LoadingCategories } from "./loading-categories";
 
-export const CategoriesSettings = () => {
-  const { data, isLoading, isError, refetch } = api.category.getMyCategories.useQuery();
+type CategoriesSettingsProps = {
+  userId: User["id"];
+};
+
+export const CategoriesSettings: FC<CategoriesSettingsProps> = ({ userId }) => {
+  const { data, isLoading, isError, refetch } = api.category.getUserCategories.useQuery({ userId });
 
   if (isLoading) {
     return <LoadingCategories />;

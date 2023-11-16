@@ -1,6 +1,6 @@
 import { FC } from "react";
 
-import { CategoryVM } from "../../types/category.vm";
+import { CategoryVM } from "../../models/category.vm";
 import { CategoryListItem } from "./category-list-item";
 
 type CategoriesListProps = {

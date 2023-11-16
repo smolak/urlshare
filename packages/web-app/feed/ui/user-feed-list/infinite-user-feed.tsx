@@ -1,6 +1,7 @@
 import { User } from "@prisma/client";
 import { InfiniteData } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
+import qs from "qs";
 import { FC } from "react";
 
 import { api } from "../../../trpc/client";
@@ -28,12 +29,15 @@ type InfiniteUserFeedProps = {
 
 export const InfiniteUserFeed: FC<InfiniteUserFeedProps> = ({ userId, from }) => {
   const searchParams = useSearchParams();
+  const categoriesString = qs.parse(searchParams.toString()).categories;
+  const categoryIdsInSearchParams = typeof categoriesString === "string" ? categoriesString.split(",") : [];
   const source = feedSourceSchema.parse(searchParams.get("source"));
 
   const { data, isLoading, isError, fetchNextPage, isFetchingNextPage } = api.feed.getUserFeed.useInfiniteQuery(
     {
       userId,
       feedSource: source,
+      categoryIds: categoryIdsInSearchParams,
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,

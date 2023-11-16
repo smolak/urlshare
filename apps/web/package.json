@@ -22,10 +22,12 @@
     "@urlshare/web-app": "*",
     "next": "^13.5.6",
     "nextjs-cors": "^2.1.2",
+    "qs": "^6.11.2",
     "react": "18.2.0",
     "react-dom": "18.2.0"
   },
   "devDependencies": {
+    "@types/qs": "^6.9.10",
     "@types/react": "^18.2.31",
     "@types/react-dom": "^18.2.14",
     "@urlshare/eslint-config": "*",
