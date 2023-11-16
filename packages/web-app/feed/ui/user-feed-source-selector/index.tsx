@@ -52,7 +52,7 @@ export const UserFeedSourceSelector: FC<UserFeedSourceSelectorProps> = ({ author
           changeSource(source as FeedSourceValue);
         }}
       >
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList>
           {feedSources.map(({ label, value }) => {
             let displayLabel: string = label;
 
@@ -61,7 +61,7 @@ export const UserFeedSourceSelector: FC<UserFeedSourceSelectorProps> = ({ author
             }
 
             return (
-              <TabsTrigger value={value} key={value}>
+              <TabsTrigger className="px-4" value={value} key={value}>
                 {displayLabel}
               </TabsTrigger>
             );

@@ -7,8 +7,8 @@ import React, { FC, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { api } from "../../../trpc/client";
+import { CategoryVM } from "../../models/category.vm";
 import { UpdateCategorySchema, updateCategorySchema } from "../../router/procedures/update-category.schema";
-import { CategoryVM } from "../../types/category.vm";
 import { ActionPending } from "./action-pending";
 import { CancelAction } from "./cancel-action";
 import { StickyErrorMessage } from "./sticky-error-message";

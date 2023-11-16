@@ -4,14 +4,20 @@ import { Button } from "@urlshare/ui/design-system/ui/button";
 import { Input } from "@urlshare/ui/design-system/ui/input";
 import { cn } from "@urlshare/ui/utils";
 import { CheckCircle, Plus } from "lucide-react";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { FC, useCallback, useEffect, useState } from "react";
 import { FieldValues, useForm } from "react-hook-form";
 
+import { CategoryVM } from "../../../category/models/category.vm";
 import { CategoryPicker } from "../../../category/ui/category-picker";
 import { api } from "../../../trpc/client";
 import { CreateUrlSchema, createUrlSchema } from "../../router/procedures/create-url.schema";
 
-export const AddUrl = () => {
+type AddUrlProps = {
+  categories: ReadonlyArray<CategoryVM>;
+  onCategoryAdd: () => void;
+};
+
+export const AddUrl: FC<AddUrlProps> = ({ categories, onCategoryAdd }) => {
   const {
     formState: { errors },
     getValues,
@@ -66,6 +72,18 @@ export const AddUrl = () => {
     [setAddedUrl, addUrl, selectedCategories]
   );
 
+  const onCategorySelectionChange = useCallback(
+    (categoryId: Category["id"]) => {
+      const categoryListed = selectedCategories.indexOf(categoryId) !== -1;
+      const newSelection = categoryListed
+        ? selectedCategories.filter((id) => categoryId !== id)
+        : [...selectedCategories, categoryId];
+
+      setSelectedCategories(newSelection);
+    },
+    [selectedCategories, setSelectedCategories]
+  );
+
   return (
     <section className="w-full">
       <div className="flex items-center gap-2">
@@ -76,6 +94,7 @@ export const AddUrl = () => {
             inputMode="url"
             disabled={isLoading}
             placeholder="https://..."
+            className="bg-white"
             onBlur={() => {
               setErrorResponse("");
 
@@ -88,15 +107,10 @@ export const AddUrl = () => {
           />
         </form>
         <CategoryPicker
+          categories={categories}
           selectedCategories={selectedCategories}
-          onCategorySelectionChange={(categoryId) => {
-            const categoryListed = selectedCategories.indexOf(categoryId) !== -1;
-            const newSelection = categoryListed
-              ? selectedCategories.filter((id) => categoryId !== id)
-              : [...selectedCategories, categoryId];
-
-            setSelectedCategories(newSelection);
-          }}
+          onCategorySelectionChange={onCategorySelectionChange}
+          onCategoryAdd={onCategoryAdd}
         />
         <Button form="add-url" type="submit" disabled={isLoading} className={cn("h-9 gap-1", { loading: isLoading })}>
           <Plus size={18} />

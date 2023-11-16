@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 import getConfig from "next/config";
 import z from "zod";
 
+import { categoryIdSchema } from "../../../category/schemas/category-id.schema";
 import { publicProcedure } from "../../../trpc/server";
 import { userIdSchema } from "../../../user/schemas/user-id.schema";
 import { FeedVM, toFeedVM } from "../../models/feed.vm";
@@ -15,6 +16,7 @@ const querySchema = z.object({
   cursor: z.date().optional(),
   userId: userIdSchema,
   feedSource: feedSourceSchema,
+  categoryIds: z.array(categoryIdSchema).optional().default([]),
 });
 
 export type GetUserFeedResponse = {
@@ -39,6 +41,7 @@ export const getUserFeed = publicProcedure
         limit: itemsPerFetch,
         cursor: input.cursor,
         feedSource: input.feedSource,
+        categoryIds: input.categoryIds,
       });
       const feed = feedRawEntries.map(toFeedVM);
 
@@ -56,6 +59,8 @@ export const getUserFeed = publicProcedure
       };
     } catch (error) {
       logger.error({ requestId, path, error }, "Failed to fetch user's feed list.");
+
+      console.log(error);
 
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",

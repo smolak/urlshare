@@ -1,9 +1,11 @@
 import { prisma } from "@urlshare/db/prisma/client";
+import { CategoryVM, toCategoryVM } from "@urlshare/web-app/category/models/category.vm";
+import { getCategoryIdsFromSearchQuery } from "@urlshare/web-app/category/utils/get-category-ids-from-search-query";
 import { FeedVM, toFeedVM } from "@urlshare/web-app/feed/models/feed.vm";
 import { getUserFeedQuery } from "@urlshare/web-app/feed/queries/get-user-feed";
+import { FeedListFilters } from "@urlshare/web-app/feed/ui/feed-list-filters";
 import { FeedList } from "@urlshare/web-app/feed/ui/user-feed-list/feed-list";
 import { InfiniteUserFeed } from "@urlshare/web-app/feed/ui/user-feed-list/infinite-user-feed";
-import { UserFeedSourceSelector } from "@urlshare/web-app/feed/ui/user-feed-source-selector";
 import { feedSourceSchema } from "@urlshare/web-app/feed/ui/user-feed-source-selector/feed-source";
 import { ThreeColumnLayout } from "@urlshare/web-app/ui/three-column.layout";
 import { PUBLIC_USER_PROFILE_DATA_SELECT_FRAGMENT } from "@urlshare/web-app/user-profile-data/models/fragments";
@@ -35,6 +37,7 @@ type UserProfilePageProps =
         urlsCount: number;
       };
       feed: ReadonlyArray<FeedVM>;
+      categories: ReadonlyArray<CategoryVM>;
       itemsPerPage: number;
     }
   | {
@@ -52,7 +55,7 @@ const createForm = (username: PublicUserProfileDataVM["username"]): string => {
 
 const UserProfilePage: NextPage<UserProfilePageProps> = (props) => {
   if (props.userData) {
-    const { self, userData, feed, itemsPerPage } = props;
+    const { self, userData, feed, itemsPerPage, categories } = props;
     const iAmLoggedIn = Boolean(self?.id);
     const myProfile = Boolean(self?.id && self.id === userData.id);
     const canFollow = !myProfile && iAmLoggedIn;
@@ -68,7 +71,7 @@ const UserProfilePage: NextPage<UserProfilePageProps> = (props) => {
               </Link>
             </div>
             <div className="flex flex-col gap-4">
-              <UserFeedSourceSelector className="md:max-w-[420px]" author={myProfile ? "Me" : userData.username} />
+              <FeedListFilters categories={categories} username={myProfile ? "Me" : userData.username} />
               {feed.length > 0 ? (
                 <>
                   <FeedList feed={feed} />
@@ -145,11 +148,14 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res, query }
   }
 
   const feedSource = feedSourceSchema.parse(query.source);
+  const categoryIds = getCategoryIdsFromSearchQuery(query.categories);
+
   const itemsPerPage = getConfig().serverRuntimeConfig.userFeedList.itemsPerPage;
   const feedRawEntries = await getUserFeedQuery({
     userId: maybePublicUserData.userId,
     limit: itemsPerPage,
     feedSource,
+    categoryIds,
   });
 
   const feed = feedRawEntries.map(toFeedVM);
@@ -160,5 +166,15 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res, query }
     createdAt: createdAt?.toISOString(),
   };
 
-  return { props: { userData: serializedUserData, feed, self, itemsPerPage } };
+  const categories = await prisma.category
+    .findMany({
+      where: {
+        userId,
+      },
+    })
+    .then((categories) => {
+      return categories.map(toCategoryVM);
+    });
+
+  return { props: { userData: serializedUserData, feed, self, itemsPerPage, categories } };
 };

@@ -2,7 +2,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@urlsh
 import { Pencil, Trash2 } from "lucide-react";
 import React, { FC, useState } from "react";
 
-import { CategoryVM } from "../../types/category.vm";
+import { CategoryVM } from "../../models/category.vm";
 import { ActionButton } from "./action-button";
 import { DeleteCategory } from "./delete-category";
 import { EditCategory } from "./edit-category";

@@ -5,7 +5,7 @@ import { ThreeColumnLayout } from "@urlshare/web-app/ui/three-column.layout";
 import { useSession } from "next-auth/react";
 
 const SettingsProfile = () => {
-  const { status } = useSession();
+  const { status, data } = useSession();
 
   return (
     status === "authenticated" && (
@@ -26,7 +26,7 @@ const SettingsProfile = () => {
               </h4>
             </header>
             <Separator className="md:max-w-[450px]" />
-            <CategoriesSettings />
+            <CategoriesSettings userId={data.user.id} />
           </section>
         }
       ></ThreeColumnLayout>
