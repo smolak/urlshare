@@ -37,8 +37,13 @@ export const CategoryListItem: FC<CategoryListItemProps> = ({ category, onCatego
 
   return (
     <span className="space-between border-1 flex h-[42px] items-center justify-between rounded-md border border-transparent px-1 transition-all hover:bg-slate-50">
-      <span className="w-full p-2" onDoubleClick={() => setState("edit")}>
-        {categoryName}
+      <span className="flex w-full items-center gap-2" onDoubleClick={() => setState("edit")}>
+        <span className="p-2">{categoryName}</span>
+        {category.urlsCount > 0 ? (
+          <span title="Number of URLs for this category" className="font-extralight text-slate-600">
+            ({category.urlsCount})
+          </span>
+        ) : null}
       </span>
       <span className="flex text-gray-600">
         <TooltipProvider>
