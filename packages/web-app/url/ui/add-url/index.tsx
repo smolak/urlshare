@@ -2,12 +2,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Category } from "@urlshare/db/prisma/client";
 import { Button } from "@urlshare/ui/design-system/ui/button";
 import { Input } from "@urlshare/ui/design-system/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@urlshare/ui/design-system/ui/popover";
 import { cn } from "@urlshare/ui/utils";
 import { CheckCircle, Plus } from "lucide-react";
 import React, { FC, useCallback, useEffect, useState } from "react";
 import { FieldValues, useForm } from "react-hook-form";
 
 import { CategoryVM } from "../../../category/models/category.vm";
+import { AddCategory } from "../../../category/ui/add-category";
 import { CategoryPicker } from "../../../category/ui/category-picker";
 import { api } from "../../../trpc/client";
 import { CreateUrlSchema, createUrlSchema } from "../../router/procedures/create-url.schema";
@@ -84,6 +86,8 @@ export const AddUrl: FC<AddUrlProps> = ({ categories, onCategoryAdd }) => {
     [selectedCategories, setSelectedCategories]
   );
 
+  const label = selectedCategories.length > 0 ? `Categories (${selectedCategories.length})` : "Categories";
+
   return (
     <section className="w-full">
       <div className="flex items-center gap-2">
@@ -106,12 +110,22 @@ export const AddUrl: FC<AddUrlProps> = ({ categories, onCategoryAdd }) => {
             }}
           />
         </form>
-        <CategoryPicker
-          categories={categories}
-          selectedCategories={selectedCategories}
-          onCategorySelectionChange={onCategorySelectionChange}
-          onCategoryAdd={onCategoryAdd}
-        />
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" className="w-[140px] bg-white hover:bg-slate-50">
+              {label}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="flex flex-col gap-4 max-md:p-3 md:w-[318px]">
+            <CategoryPicker
+              description="Pick one ore more, they're optional"
+              categories={categories}
+              selectedCategories={selectedCategories}
+              onCategorySelectionChange={onCategorySelectionChange}
+            />
+            <AddCategory onCategoryAdd={onCategoryAdd} size="small" />
+          </PopoverContent>
+        </Popover>
         <Button form="add-url" type="submit" disabled={isLoading} className={cn("h-9 gap-1", { loading: isLoading })}>
           <Plus size={18} />
           <span>Add</span>
