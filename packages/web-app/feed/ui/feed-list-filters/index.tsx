@@ -14,7 +14,7 @@ export const FeedListFilters: FC<FeedListFiltersProps> = ({ username, categories
   return (
     <aside className="flex justify-between">
       <UserFeedSourceSelector author={username} />
-      <CategoriesSelector categories={categories} />
+      <CategoriesSelector author={username} categories={categories} />
     </aside>
   );
 };
