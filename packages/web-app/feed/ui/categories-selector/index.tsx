@@ -121,7 +121,7 @@ export const CategoriesSelector: FC<CategoriesSelectorProps> = ({ author, catego
               <PopoverTrigger asChild>
                 <Info size={14} strokeWidth={2.5} className="absolute right-3.5 top-3.5 z-50 cursor-pointer" />
               </PopoverTrigger>
-              <PopoverContent className="bg-slate-50 text-sm">{createExplanation(author)}</PopoverContent>
+              <PopoverContent className="bg-slate-100 text-sm">{createExplanation(author)}</PopoverContent>
             </Popover>
             <DropdownMenuCheckboxItem
               checked={allCategoriesChecked}
