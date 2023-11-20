@@ -1,4 +1,5 @@
 import { prisma } from "@urlshare/db/prisma/client";
+import { createPossessiveForm } from "@urlshare/shared/utils/create-possessive-form";
 import { CategoryVM, toCategoryVM } from "@urlshare/web-app/category/models/category.vm";
 import { getCategoryIdsFromSearchQuery } from "@urlshare/web-app/category/utils/get-category-ids-from-search-query";
 import { FeedVM, toFeedVM } from "@urlshare/web-app/feed/models/feed.vm";
@@ -10,7 +11,6 @@ import { feedSourceSchema } from "@urlshare/web-app/feed/ui/user-feed-source-sel
 import { RssLink } from "@urlshare/web-app/rss/ui/rss-link";
 import { ThreeColumnLayout } from "@urlshare/web-app/ui/three-column.layout";
 import { PUBLIC_USER_PROFILE_DATA_SELECT_FRAGMENT } from "@urlshare/web-app/user-profile-data/models/fragments";
-import { PublicUserProfileDataVM } from "@urlshare/web-app/user-profile-data/models/public-user-profile-data.vm";
 import { usernameSchema } from "@urlshare/web-app/user-profile-data/schemas/user-profile-data.schema";
 import { UserProfileCard } from "@urlshare/web-app/user-profile-data/ui/user-profile-card";
 import { StatusCodes } from "http-status-codes";
@@ -46,12 +46,6 @@ type UserProfilePageProps =
       errorCode: number;
     };
 
-const createForm = (username: PublicUserProfileDataVM["username"]): string => {
-  const endsWithS = username.substring(username.length - 1).toLowerCase() === "s";
-
-  return endsWithS ? `${username}'` : `${username}'s`;
-};
-
 const UserProfilePage: NextPage<UserProfilePageProps> = (props) => {
   if (props.userData) {
     const { self, userData, feed, itemsPerPage, categories } = props;
@@ -64,7 +58,9 @@ const UserProfilePage: NextPage<UserProfilePageProps> = (props) => {
         mainContent={
           <section>
             <div className="mb-5 flex items-center justify-between">
-              <h1 className="text-lg font-bold">{myProfile ? "My URLs" : `${createForm(userData.username)} URLs`}</h1>
+              <h1 className="text-lg font-bold">
+                {myProfile ? "My URLs" : `${createPossessiveForm(userData.username)} URLs`}
+              </h1>
               <RssLink username={userData.username} />
             </div>
             <div className="flex flex-col gap-4">

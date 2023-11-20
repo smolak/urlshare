@@ -1,4 +1,5 @@
 import { Category } from "@urlshare/db/prisma/client";
+import { createPossessiveForm } from "@urlshare/shared/utils/create-possessive-form";
 import { Button } from "@urlshare/ui/design-system/ui/button";
 import {
   DropdownMenu,
@@ -7,6 +8,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@urlshare/ui/design-system/ui/dropdown-menu";
+import { Popover, PopoverContent, PopoverTrigger } from "@urlshare/ui/design-system/ui/popover";
+import { Info } from "lucide-react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
 import qs from "qs";
@@ -17,6 +20,17 @@ import { CategoryPickerCategoriesList } from "../../../category/ui/category-pick
 
 type CategoriesSelectorProps = {
   categories: ReadonlyArray<CategoryVM>;
+  author: string;
+};
+
+const createExplanation = (username: string) => {
+  if (username === "Me") {
+    return "Filtering by category will narrow down your URLs only, as categories are not shared, they are yours.";
+  }
+
+  return `Filtering by categories will narrow down ${createPossessiveForm(
+    username
+  )} URLs only, as categories are not shared.`;
 };
 
 const getSelectedCategories = (categories: ReadonlyArray<CategoryVM>, searchParams: string): CategoryVM["id"][] => {
@@ -32,7 +46,7 @@ const getSelectedCategories = (categories: ReadonlyArray<CategoryVM>, searchPara
     .map(({ id }) => id);
 };
 
-export const CategoriesSelector: FC<CategoriesSelectorProps> = ({ categories }) => {
+export const CategoriesSelector: FC<CategoriesSelectorProps> = ({ author, categories }) => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -96,13 +110,19 @@ export const CategoriesSelector: FC<CategoriesSelectorProps> = ({ categories }) 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="w-[140px]">
+        <Button variant="outline" className="w-[200px]">
           {buttonLabel}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
         {categories.length > 0 ? (
           <>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Info size={14} strokeWidth={2.5} className="absolute right-3.5 top-3.5 z-50 cursor-pointer" />
+              </PopoverTrigger>
+              <PopoverContent className="bg-slate-50 text-sm">{createExplanation(author)}</PopoverContent>
+            </Popover>
             <DropdownMenuCheckboxItem
               checked={allCategoriesChecked}
               onClick={onAllCategoriesClick}
