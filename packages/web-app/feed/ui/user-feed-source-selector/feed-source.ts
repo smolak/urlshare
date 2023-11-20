@@ -13,4 +13,6 @@ export const DEFAULT_FEED_SOURCE: FeedSourceValue = "default";
 
 const feedSourceValues = feedSources.map(({ value }) => value) as NonEmptyArray<FeedSourceValue>;
 
+export type FeedSource = z.infer<typeof feedSourceSchema>;
+
 export const feedSourceSchema = z.enum(feedSourceValues).catch(DEFAULT_FEED_SOURCE);

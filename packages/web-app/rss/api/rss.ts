@@ -1,51 +1,66 @@
-import { Feed, prisma, Url, UserProfileData, UserUrl } from "@urlshare/db/prisma/client";
-import { CompressedMetadata, decompressMetadata } from "@urlshare/metadata/compression";
+import { Category, prisma, UserProfileData } from "@urlshare/db/prisma/client";
+import { decompressMetadata } from "@urlshare/metadata/compression";
 import { generateRssFeed } from "@urlshare/rss/utils/generate-rss-feed";
+import { createPossessiveForm } from "@urlshare/shared/utils/create-possessive-form";
 import { ServerResponse } from "http";
 import getConfig from "next/config";
 
+import { CategoryId } from "../../category/schemas/category-id.schema";
+import { sortAZ } from "../../category/utils/sort-a-z";
 import { WEB_APP_BASE_URL, WEB_APP_DOMAIN } from "../../constants";
-
-const createTitle = (username: UserProfileData["username"]) => {
-  if (username.slice(-1) === "s") {
-    return `${username}' links`;
-  }
-
-  return `${username}'s links`;
-};
+import { getUserFeedQuery } from "../../feed/queries/get-user-feed";
+import { FeedSource } from "../../feed/ui/user-feed-source-selector/feed-source";
 
 type RequiredUserData = Pick<UserProfileData, "username" | "userId">;
-type RssItemData = {
-  userUrl_id: UserUrl["id"];
-  feed_createdAt: Feed["createdAt"];
-  url_url: Url["url"];
-  url_metadata: CompressedMetadata;
-};
+type GenerateRss = (
+  {
+    userData,
+    feedSource,
+    categoryIds,
+  }: { userData: RequiredUserData; feedSource: FeedSource; categoryIds: CategoryId[] },
+  res: ServerResponse
+) => Promise<void>;
 
-export async function generateRss({ username, userId }: RequiredUserData, res: ServerResponse) {
+const createTitle = (username: UserProfileData["username"]) => `${createPossessiveForm(username)} URLs`;
+
+export const generateRss: GenerateRss = async ({ userData, feedSource, categoryIds }, res) => {
+  const { userId, username } = userData;
   const itemsPerUserChannel = getConfig().serverRuntimeConfig.rss.itemsPerUserChannel;
-  const rssItems = await prisma.$queryRaw<ReadonlyArray<RssItemData>>`
-          SELECT Feed.createdAt AS feed_createdAt, Url.url AS url_url, Url.metadata AS url_metadata
-          FROM Feed
-          LEFT JOIN UserUrl ON Feed.userUrlId = UserUrl.id
-          LEFT JOIN Url ON UserUrl.urlId = Url.id
-          WHERE Feed.userId = ${userId}
-          ORDER BY Feed.createdAt DESC
-          LIMIT 0, ${itemsPerUserChannel}
-      `;
+  let filteredCategoryIds: string[] = [];
+  let filteredCategoryNames: Category["name"][] = [];
+
+  if (categoryIds.length > 0) {
+    const userCategories = await prisma.category.findMany({
+      where: {
+        userId,
+      },
+    });
+
+    filteredCategoryIds = userCategories.filter(({ id }) => categoryIds.indexOf(id) !== -1).map(({ id }) => id);
+    filteredCategoryNames = userCategories.filter(({ id }) => categoryIds.indexOf(id) !== -1).map(({ name }) => name);
+  }
+
+  const feedRawEntries = await getUserFeedQuery({
+    userId,
+    limit: itemsPerUserChannel,
+    feedSource,
+    categoryIds: filteredCategoryIds,
+  });
 
   const channel = {
     title: createTitle(username),
     link: `${WEB_APP_BASE_URL}/${username}`,
     description: `Links added by ${username} @ ${WEB_APP_DOMAIN}`,
-    items: rssItems.map((rssItem) => {
-      const metadata = decompressMetadata(rssItem.url_metadata);
+    categories: filteredCategoryNames.sort(sortAZ),
+    items: feedRawEntries.map((feedRawEntry) => {
+      const metadata = decompressMetadata(feedRawEntry.url_metadata);
 
       return {
         title: metadata.title || "",
         description: metadata.description || "",
-        link: rssItem.url_url,
-        pubDate: new Date(rssItem.feed_createdAt).toUTCString(),
+        link: feedRawEntry.url_url,
+        pubDate: new Date(feedRawEntry.feed_createdAt).toUTCString(),
+        categories: feedRawEntry.category_names ? feedRawEntry.category_names.split(",").sort(sortAZ) : [],
       };
     }),
   };
@@ -55,4 +70,4 @@ export async function generateRss({ username, userId }: RequiredUserData, res: S
   res.setHeader("Content-Type", "text/xml");
   res.write(rss);
   res.end();
-}
+};

@@ -142,13 +142,26 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res, query }
 
   const feedSource = feedSourceSchema.parse(query.source);
   const categoryIds = getCategoryIdsFromSearchQuery(query.categories);
-
   const itemsPerPage = getConfig().serverRuntimeConfig.userFeedList.itemsPerPage;
+
+  const categories = await prisma.category
+    .findMany({
+      where: {
+        userId: maybePublicUserData.userId,
+      },
+    })
+    .then((categories) => {
+      return categories.map(toCategoryVM);
+    });
+
+  // Make sure only the user-owned category IDs are used, and not all passed from URL.
+  const filteredCategoryIds = categories.filter(({ id }) => categoryIds.indexOf(id) !== -1).map(({ id }) => id);
+
   const feedRawEntries = await getUserFeedQuery({
     userId: maybePublicUserData.userId,
     limit: itemsPerPage,
     feedSource,
-    categoryIds,
+    categoryIds: filteredCategoryIds,
   });
 
   const feed = feedRawEntries.map(toFeedVM);
@@ -158,16 +171,6 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res, query }
     id: userId,
     createdAt: createdAt?.toISOString(),
   };
-
-  const categories = await prisma.category
-    .findMany({
-      where: {
-        userId,
-      },
-    })
-    .then((categories) => {
-      return categories.map(toCategoryVM);
-    });
 
   return { props: { userData: serializedUserData, feed, self, itemsPerPage, categories } };
 };
