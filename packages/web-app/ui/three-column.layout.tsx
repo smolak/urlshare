@@ -21,7 +21,7 @@ export const ThreeColumnLayout: FC<ThreeColumnLayoutProps> = ({
     <>
       <MainHeader />
 
-      <div className="container p-4 md:py-6 lg:py-8">
+      <div className="container p-4 md:py-6">
         {headerContent ? (
           <header className="mb-6">
             {headerContent}

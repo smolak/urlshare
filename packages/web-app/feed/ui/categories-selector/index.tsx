@@ -101,19 +101,25 @@ export const CategoriesSelector: FC<CategoriesSelectorProps> = ({ categories }) 
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
-        <DropdownMenuCheckboxItem
-          checked={allCategoriesChecked}
-          onClick={onAllCategoriesClick}
-          className="cursor-pointer"
-        >
-          Any category
-        </DropdownMenuCheckboxItem>
-        <DropdownMenuSeparator />
-        <CategoryPickerCategoriesList
-          className="p-2"
-          categories={categoryPickerCategories}
-          onCategorySelectionChange={onCategorySelectionChange}
-        />
+        {categories.length > 0 ? (
+          <>
+            <DropdownMenuCheckboxItem
+              checked={allCategoriesChecked}
+              onClick={onAllCategoriesClick}
+              className="cursor-pointer"
+            >
+              Any category
+            </DropdownMenuCheckboxItem>
+            <DropdownMenuSeparator />
+            <CategoryPickerCategoriesList
+              className="p-2"
+              categories={categoryPickerCategories}
+              onCategorySelectionChange={onCategorySelectionChange}
+            />
+          </>
+        ) : (
+          <p className="p-2 text-sm">No categories here, yet</p>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

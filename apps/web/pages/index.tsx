@@ -63,7 +63,7 @@ const AuthenticatedUserPageContent: FC<AuthenticatedUserPageContentProps> = ({ u
   });
 
   return (
-    <div className="flex flex-col gap-2 sm:gap-5">
+    <div className="flex flex-col gap-2">
       {isLoading ? (
         <div className="flex flex-col items-center">
           <LoadingIndicator label="Fetching categories" />
@@ -71,12 +71,10 @@ const AuthenticatedUserPageContent: FC<AuthenticatedUserPageContentProps> = ({ u
       ) : null}
       {isError ? <ErrorLoadingCategories onLoadCategoriesClick={() => !isRefetching && refetch()} /> : null}
       {isSuccess ? (
-        <>
-          <aside className="rounded-md bg-slate-100 p-4">
-            <AddUrl categories={categories} onCategoryAdd={() => refetch()} />
-          </aside>
+        <div className="flex flex-col gap-7">
+          <AddUrl categories={categories} onCategoryAdd={() => refetch()} />
           <FeedListFilters categories={categories} username="Me" />
-        </>
+        </div>
       ) : null}
       <InfiniteUserFeed userId={userId} />
     </div>
