@@ -7,16 +7,15 @@ import { FeedListFilters } from "@urlshare/web-app/feed/ui/feed-list-filters";
 import { FeedList } from "@urlshare/web-app/feed/ui/user-feed-list/feed-list";
 import { InfiniteUserFeed } from "@urlshare/web-app/feed/ui/user-feed-list/infinite-user-feed";
 import { feedSourceSchema } from "@urlshare/web-app/feed/ui/user-feed-source-selector/feed-source";
+import { RssLink } from "@urlshare/web-app/rss/ui/rss-link";
 import { ThreeColumnLayout } from "@urlshare/web-app/ui/three-column.layout";
 import { PUBLIC_USER_PROFILE_DATA_SELECT_FRAGMENT } from "@urlshare/web-app/user-profile-data/models/fragments";
 import { PublicUserProfileDataVM } from "@urlshare/web-app/user-profile-data/models/public-user-profile-data.vm";
 import { usernameSchema } from "@urlshare/web-app/user-profile-data/schemas/user-profile-data.schema";
 import { UserProfileCard } from "@urlshare/web-app/user-profile-data/ui/user-profile-card";
 import { StatusCodes } from "http-status-codes";
-import { RssIcon } from "lucide-react";
 import { GetServerSideProps, NextPage } from "next";
 import getConfig from "next/config";
-import Link from "next/link";
 import { getToken } from "next-auth/jwt";
 
 type Self = {
@@ -66,9 +65,7 @@ const UserProfilePage: NextPage<UserProfilePageProps> = (props) => {
           <section>
             <div className="mb-5 flex items-center justify-between">
               <h1 className="text-lg font-bold">{myProfile ? "My URLs" : `${createForm(userData.username)} URLs`}</h1>
-              <Link href={`${userData.username}/rss.xml`} className="-mt-3 p-3">
-                <RssIcon size={16} />
-              </Link>
+              <RssLink username={userData.username} />
             </div>
             <div className="flex flex-col gap-4">
               <FeedListFilters categories={categories} username={myProfile ? "Me" : userData.username} />
