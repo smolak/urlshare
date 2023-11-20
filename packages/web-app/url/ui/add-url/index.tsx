@@ -98,7 +98,7 @@ export const AddUrl: FC<AddUrlProps> = ({ categories, onCategoryAdd }) => {
 
   return (
     <section className="w-full">
-      <div className="rounded-md bg-slate-50 p-4">
+      <div className="rounded-md bg-slate-100 p-4">
         <Input
           type="url"
           inputMode="url"
