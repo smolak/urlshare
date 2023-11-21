@@ -120,62 +120,71 @@ export const AddUrl: FC<AddUrlProps> = ({ categories, onCategoryAdd }) => {
             <DialogDescription>Type the URL, select categories, and share it!</DialogDescription>
           </DialogHeader>
           <div className="flex w-full flex-col items-center gap-2 sm:flex-row">
-            <form onSubmit={handleSubmit(onSubmit)} id="add-url" className="grow">
-              <Input
-                {...register("url")}
-                type="url"
-                inputMode="url"
-                disabled={isLoading}
-                placeholder="https://..."
-                className="h-10"
-                onBlur={() => {
-                  setErrorResponse("");
+            {addedUrl === "" ? (
+              <>
+                <form onSubmit={handleSubmit(onSubmit)} id="add-url" className="grow">
+                  <Input
+                    {...register("url")}
+                    type="url"
+                    inputMode="url"
+                    disabled={isLoading}
+                    placeholder="https://..."
+                    className="h-10"
+                    onBlur={() => {
+                      setErrorResponse("");
 
-                  const { url } = getValues();
+                      const { url } = getValues();
 
-                  if (url === "") {
-                    resetField("url");
-                  }
-                }}
-              />
-            </form>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button size="lg" variant="outline" className="w-[160px] bg-white px-2 hover:bg-slate-50">
-                  {label}
+                      if (url === "") {
+                        resetField("url");
+                      }
+                    }}
+                  />
+                </form>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button size="lg" variant="outline" className="w-[160px] bg-white px-2 hover:bg-slate-50">
+                      {label}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="flex flex-col gap-4 max-md:p-3 md:w-[318px]">
+                    <CategoryPicker
+                      description="Pick one ore more, they're optional"
+                      categories={categories}
+                      selectedCategories={selectedCategories}
+                      onCategorySelectionChange={onCategorySelectionChange}
+                    />
+                    <AddCategory onCategoryAdd={onCategoryAdd} size="small" />
+                  </PopoverContent>
+                </Popover>
+                <Button
+                  form="add-url"
+                  type="submit"
+                  size="lg"
+                  disabled={isLoading}
+                  className={cn({ loading: isLoading })}
+                >
+                  <Plus size={18} />
+                  <span>Add URL</span>
                 </Button>
-              </PopoverTrigger>
-              <PopoverContent className="flex flex-col gap-4 max-md:p-3 md:w-[318px]">
-                <CategoryPicker
-                  description="Pick one ore more, they're optional"
-                  categories={categories}
-                  selectedCategories={selectedCategories}
-                  onCategorySelectionChange={onCategorySelectionChange}
-                />
-                <AddCategory onCategoryAdd={onCategoryAdd} size="small" />
-              </PopoverContent>
-            </Popover>
-            <Button form="add-url" type="submit" size="lg" disabled={isLoading} className={cn({ loading: isLoading })}>
-              <Plus size={18} />
-              <span>Add URL</span>
-            </Button>
+              </>
+            ) : (
+              <p
+                className="border-1 h-10 rounded rounded-md border border-green-600 bg-green-50 px-3 text-sm text-green-600"
+                onClick={() => setAddedUrl("")}
+              >
+                <span className="flex h-10 items-center gap-2">
+                  <CheckCircle size={14} />
+                  <span>URL added. It will be live soon.</span>
+                </span>
+              </p>
+            )}
           </div>
           {errors?.url?.message || errorResponse !== "" ? (
             <p className="absolute mt-1 rounded rounded-md bg-red-50 px-2 py-1 text-sm text-red-600">
               {errors?.url?.message || errorResponse}
             </p>
           ) : null}
-          {addedUrl !== "" && (
-            <p
-              className="absolute mt-1 rounded rounded-md bg-green-50 px-2 py-1 text-sm text-green-600"
-              onClick={() => setAddedUrl("")}
-            >
-              <span className="flex items-center gap-2">
-                <CheckCircle size={13} />
-                <span>URL added. It will be live soon.</span>
-              </span>
-            </p>
-          )}
         </DialogContent>
       </Dialog>
     </section>
