@@ -62,7 +62,7 @@ model UrlQueue {
   status       UrlQueueStatus @default(NEW)
   attemptCount Int            @default(0) @db.UnsignedTinyInt
   metadata     Json           @default("{}")
-  categoryIds  Json           @default("[]")
+  categoryIds  Json?
   // User will be notified if something went wrong
   // also it will be used later to populate the UserUrl table
   user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
