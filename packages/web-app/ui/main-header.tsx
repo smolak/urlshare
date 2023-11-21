@@ -7,7 +7,7 @@ import {
   DropdownMenuTrigger,
 } from "@urlshare/ui/design-system/ui/dropdown-menu";
 import { cn } from "@urlshare/ui/utils";
-import { LogOut, User } from "lucide-react";
+import { List, LogOut, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { signOut, useSession } from "next-auth/react";
@@ -86,6 +86,10 @@ export const MainHeader: FC = () => {
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>My account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem className="gap-2">
+                  <List size={12} />
+                  <Link href="/settings/categories">Categories</Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem className="gap-2">
                   <User size={12} />
                   <Link href="/settings/profile">Profile</Link>
