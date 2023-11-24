@@ -4,11 +4,13 @@ import { Separator } from "@urlshare/ui/design-system/ui/separator";
 import type { CategoryVM } from "@urlshare/web-app/category/models/category.vm";
 import { CategoryPicker } from "@urlshare/web-app/category/ui/category-picker";
 import { Check } from "lucide-react";
-import React, { type FC, useCallback, useState } from "react";
+import React, { type FC, useCallback, useEffect, useState } from "react";
 
 import { AddCategory } from "../add-category";
+import { CATEGORIES_STORAGE_KEY } from "../constants/storage";
 import { useAddUrl } from "../hooks/use-add-url";
 import { useCategories } from "../hooks/use-categories";
+import { useSyncStorage } from "../hooks/use-sync-storage";
 
 type AddUrlProps = {
   apiKey: string;
@@ -16,8 +18,15 @@ type AddUrlProps = {
 };
 
 export const AddUrl: FC<AddUrlProps> = ({ apiKey, url }) => {
+  const [categories, setCategories] = useSyncStorage<CategoryVM[]>(CATEGORIES_STORAGE_KEY, []);
   const { mutate, isLoading, isSuccess, isError } = useAddUrl(apiKey);
-  const { data: categories, isSuccess: categoriesLoaded, refetch } = useCategories(apiKey);
+  const { data, isSuccess: categoriesFetched, refetch } = useCategories(apiKey);
+
+  useEffect(() => {
+    if (categoriesFetched) {
+      setCategories(data);
+    }
+  }, [categoriesFetched, data]);
 
   const [selectedCategories, setSelectedCategories] = useState([]);
 
@@ -39,21 +48,20 @@ export const AddUrl: FC<AddUrlProps> = ({ apiKey, url }) => {
 
   return (
     <div className="flex flex-col gap-4 p-2">
-      {categoriesLoaded &&
-        (categories.length > 0 ? (
-          <div>
-            <h2 className="text-lg font-medium">Categories</h2>
-            <CategoryPicker
-              description="optional"
-              categories={categories}
-              selectedCategories={selectedCategories}
-              onCategorySelectionChange={onCategorySelectionChange}
-              showSettingsLink={false}
-            />
-          </div>
-        ) : (
-          <div className="text-sm">No categories. Add some.</div>
-        ))}
+      {categories.length > 0 ? (
+        <div>
+          <h2 className="text-lg font-medium">Categories</h2>
+          <CategoryPicker
+            description="optional"
+            categories={categories}
+            selectedCategories={selectedCategories}
+            onCategorySelectionChange={onCategorySelectionChange}
+            showSettingsLink={false}
+          />
+        </div>
+      ) : (
+        <div className="text-sm">No categories. Add some.</div>
+      )}
 
       <AddCategory apiKey={apiKey} onSuccess={() => refetch()} />
       <Separator />

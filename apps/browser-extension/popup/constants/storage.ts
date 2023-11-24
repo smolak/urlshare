@@ -1,0 +1,2 @@
+export const API_KEY_STORAGE_KEY = "API_KEY";
+export const CATEGORIES_STORAGE_KEY = "CATEGORIES";

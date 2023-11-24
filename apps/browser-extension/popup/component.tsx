@@ -1,39 +1,27 @@
 import "../styles/globals.css";
 
-import { Storage } from "@plasmohq/storage";
 import React, { useEffect, useState } from "react";
 
 import { AddUrl } from "./add-url";
+import { API_KEY_STORAGE_KEY } from "./constants/storage";
+import { useSyncStorage } from "./hooks/use-sync-storage";
 import { Settings } from "./settings";
 import { SettingsButton } from "./settings/settings-button";
-
-const API_KEY_STORAGE_KEY = "API_KEY";
-
-const storage = new Storage({
-  area: "sync",
-});
 
 export const PopupComponent = () => {
   const [canAddUrls, setCanAddUrls] = useState(false);
   const [showSettings, setShowSettings] = useState(true);
   const [currentUrl, setCurrentUrl] = useState("");
-  const [apiKey, setApiKey] = useState("");
+  const [apiKey, setApiKey] = useSyncStorage(API_KEY_STORAGE_KEY, "");
 
   useEffect(() => {
-    storage.get(API_KEY_STORAGE_KEY).then((maybeApiKey) => {
-      if (typeof maybeApiKey === "string") {
-        const apiKey = maybeApiKey.trim();
+    if (apiKey.trim() !== "") {
+      const canAddUrls = apiKey !== "";
 
-        if (apiKey) {
-          const canAddUrls = apiKey !== "";
-
-          setCanAddUrls(canAddUrls);
-          setShowSettings(!canAddUrls);
-          setApiKey(apiKey);
-        }
-      }
-    });
-  }, []);
+      setCanAddUrls(canAddUrls);
+      setShowSettings(!canAddUrls);
+    }
+  }, [apiKey]);
 
   useEffect(() => {
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
@@ -46,10 +34,8 @@ export const PopupComponent = () => {
   }, []);
 
   const saveApiKey = (apiKey: string) => {
-    storage.set(API_KEY_STORAGE_KEY, apiKey).then(() => {
-      setCanAddUrls(apiKey !== "");
-      setApiKey(apiKey);
-    });
+    setCanAddUrls(apiKey !== "");
+    setApiKey(apiKey);
   };
 
   return (
