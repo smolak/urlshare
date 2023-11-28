@@ -30,7 +30,7 @@ export const FeedListItem: FC<FeedListItemProps> = ({ feedItem, interactions }) 
 
   return (
     <Card className="overflow-hidden shadow hover:shadow-lg">
-      <CardHeader className="group cursor-pointer gap-2">
+      <CardHeader className="relative cursor-pointer">
         <CardTitle className="flex items-center gap-3">
           {isAnImage && <ImageIcon strokeWidth={1} size={40} className="text-slate-400" aria-label="Image icon" />}
           {isAWebsite && (
@@ -46,12 +46,12 @@ export const FeedListItem: FC<FeedListItemProps> = ({ feedItem, interactions }) 
             href={url.url}
             title={url.metadata.title}
             target="_blank"
-            className="overflow-hidden text-ellipsis leading-7 decoration-slate-200 group-hover:underline"
+            className="overflow-hidden text-ellipsis leading-7 leading-snug decoration-slate-200 group-hover:underline"
           >
             {url.metadata.title || url.url}
           </a>
         </CardTitle>
-        <span className="text-secondary flex flex-row items-center gap-2 pl-12 text-xs">
+        <span className="text-secondary flex flex-row items-center gap-1 pl-12 text-xs text-slate-400">
           <Calendar size={13} />
           <span>{createdAt.toLocaleString()}</span>
         </span>
@@ -63,7 +63,7 @@ export const FeedListItem: FC<FeedListItemProps> = ({ feedItem, interactions }) 
               href={url.url}
               title={url.metadata.title}
               target="_blank"
-              className="flex max-h-96 place-content-center overflow-hidden rounded rounded-md"
+              className="flex max-h-80 place-content-center overflow-hidden rounded rounded-md"
             >
               <img src={url.metadata.image} alt={url.metadata.title} className="object-cover" />
             </a>
@@ -71,12 +71,12 @@ export const FeedListItem: FC<FeedListItemProps> = ({ feedItem, interactions }) 
         )}
         <CardDescription>{url.metadata.description}</CardDescription>
       </CardContent>
-      <CardFooter className="flex justify-between">
-        <div className="flex items-center gap-2">
+      <CardFooter className="flex items-center justify-between gap-4">
+        <div className="flex grow items-center gap-2">
           <div>{interactions}</div>
-          <div className="text-sm font-light text-slate-400">{url.categoryNames.join(", ")}</div>
+          <span className="text-xs font-light text-slate-400">{url.categoryNames.join(", ")}</span>
         </div>
-        <Link href={`/${user.username}`}>
+        <Link href={`/${user.username}`} className="flex-none">
           <UserImage username={user.username} image={user.image as string} size="small" />
         </Link>
       </CardFooter>
