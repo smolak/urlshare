@@ -1,5 +1,6 @@
 import { isImage, isWebsite } from "@urlshare/metadata/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@urlshare/ui/design-system/ui/avatar";
+import { Button } from "@urlshare/ui/design-system/ui/button";
 import {
   Card,
   CardContent,
@@ -8,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@urlshare/ui/design-system/ui/card";
-import { Calendar, Image as ImageIcon } from "lucide-react";
+import { Calendar, Image as ImageIcon, MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 import { FC, ReactNode } from "react";
 
@@ -20,9 +21,10 @@ import { FeedVM } from "../../models/feed.vm";
 type FeedListItemProps = {
   feedItem: FeedVM;
   interactions: ReactNode;
+  optionsDropdown?: ReactNode;
 };
 
-export const FeedListItem: FC<FeedListItemProps> = ({ feedItem, interactions }) => {
+export const FeedListItem: FC<FeedListItemProps> = ({ feedItem, interactions, optionsDropdown }) => {
   const { url, createdAt, user } = feedItem;
   const isAnImage = isImage(url.metadata);
   const isAWebsite = isWebsite(url.metadata);
@@ -55,6 +57,18 @@ export const FeedListItem: FC<FeedListItemProps> = ({ feedItem, interactions }) 
           <Calendar size={13} />
           <span>{createdAt.toLocaleString()}</span>
         </span>
+        {optionsDropdown ? (
+          <>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-3 top-1 h-7 w-7 rounded rounded-full text-slate-400 hover:text-slate-600"
+            >
+              <MoreHorizontal size={16} />
+            </Button>
+            {optionsDropdown}
+          </>
+        ) : null}
       </CardHeader>
       <CardContent className="flex flex-col gap-5">
         {url.metadata.image && (

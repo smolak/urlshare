@@ -49,8 +49,9 @@ type UserProfilePageProps =
 const UserProfilePage: NextPage<UserProfilePageProps> = (props) => {
   if (props.userData) {
     const { self, userData, feed, itemsPerPage, categories } = props;
-    const iAmLoggedIn = Boolean(self?.id);
-    const myProfile = Boolean(self?.id && self.id === userData.id);
+    const maybeUserId = self?.id;
+    const iAmLoggedIn = Boolean(maybeUserId);
+    const myProfile = Boolean(maybeUserId === userData.id);
     const canFollow = !myProfile && iAmLoggedIn;
 
     return (
@@ -67,9 +68,13 @@ const UserProfilePage: NextPage<UserProfilePageProps> = (props) => {
               <FeedListFilters categories={categories} username={myProfile ? "Me" : userData.username} />
               {feed.length > 0 ? (
                 <>
-                  <FeedList feed={feed} />
+                  <FeedList feed={feed} viewerId={maybeUserId} />
                   {feed.length === itemsPerPage && (
-                    <InfiniteUserFeed userId={userData.id} from={feed[feed.length - 1].createdAt} />
+                    <InfiniteUserFeed
+                      viewerId={maybeUserId}
+                      userId={userData.id}
+                      from={feed[feed.length - 1].createdAt}
+                    />
                   )}
                 </>
               ) : (

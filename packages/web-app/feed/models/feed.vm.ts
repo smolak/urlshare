@@ -10,6 +10,7 @@ export const toFeedVM = (entry: RawFeedEntry): FeedVM => {
     id: entry.feed_id,
     createdAt: entry.feed_createdAt.toISOString(),
     user: {
+      id: entry.user_userId,
       image: entry.user_image,
       username: entry.user_username,
     },
@@ -30,6 +31,7 @@ export type FeedVM = {
   id: Feed["id"];
   createdAt: ISODateString;
   user: {
+    id: UserProfileData["userId"];
     image: User["image"];
     username: UserProfileData["username"];
   };

@@ -1,12 +1,12 @@
 import { createTRPCRouter } from "../../trpc/server";
 import { createUrl } from "./procedures/create-url";
 import { getUrls } from "./procedures/get-urls";
-import { updateUrl } from "./procedures/update-url";
+import { updateUserUrl } from "./procedures/update-user-url";
 
 export const urlRouter = createTRPCRouter({
   createUrl,
   getUrls,
-  updateUrl,
+  updateUserUrl,
 });
 
 export type UrlRouter = typeof urlRouter;
