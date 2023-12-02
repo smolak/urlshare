@@ -2,6 +2,7 @@ import { CompressedMetadata, decompressMetadata } from "@urlshare/metadata/compr
 
 import { protectedProcedure } from "../../../trpc/server";
 
+// TODO: Check if this one is used, probably not.
 export const getUrls = protectedProcedure.query(async ({ ctx: { prisma } }) => {
   const userUrls = await prisma.userUrl.findMany({
     include: {

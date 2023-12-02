@@ -25,9 +25,10 @@ const getNextCursor = (data: InfiniteData<GetUserFeedResponse>) => {
 type InfiniteUserFeedProps = {
   from?: FeedVM["createdAt"];
   userId: User["id"];
+  viewerId?: User["id"];
 };
 
-export const InfiniteUserFeed: FC<InfiniteUserFeedProps> = ({ userId, from }) => {
+export const InfiniteUserFeed: FC<InfiniteUserFeedProps> = ({ userId, from, viewerId }) => {
   const searchParams = useSearchParams();
   const categoriesString = qs.parse(searchParams.toString()).categories;
   const categoryIdsInSearchParams = typeof categoriesString === "string" ? categoriesString.split(",") : [];
@@ -70,6 +71,7 @@ export const InfiniteUserFeed: FC<InfiniteUserFeedProps> = ({ userId, from }) =>
       loadMore={fetchNextPage}
       shouldLoadMore={shouldLoadMore}
       isFetching={isFetchingNextPage}
+      viewerId={viewerId}
     />
   );
 };

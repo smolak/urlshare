@@ -1,6 +1,7 @@
 import { User } from "@urlshare/db/prisma/client";
 import { buttonVariants } from "@urlshare/ui/design-system/ui/button";
 import { cn } from "@urlshare/ui/utils";
+import { useCategoriesStore } from "@urlshare/web-app/category/stores/use-categories-store";
 import { ErrorLoadingCategories } from "@urlshare/web-app/category/ui/category-picker/error-loading-categories";
 import { WEB_APP_DOMAIN } from "@urlshare/web-app/constants";
 import { FeedListFilters } from "@urlshare/web-app/feed/ui/feed-list-filters";
@@ -12,7 +13,7 @@ import { AddUrl } from "@urlshare/web-app/url/ui/add-url";
 import Head from "next/head";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { FC } from "react";
+import { FC, useEffect } from "react";
 
 const HomepageContent: FC = () => {
   const { status, data } = useSession();
@@ -61,6 +62,20 @@ const AuthenticatedUserPageContent: FC<AuthenticatedUserPageContentProps> = ({ u
   } = api.category.getUserCategories.useQuery({
     userId,
   });
+  const { setCategories, shouldRefetchCategories, setShouldRefetchCategories } = useCategoriesStore();
+
+  useEffect(() => {
+    if (isSuccess) {
+      setCategories(categories);
+    }
+  }, [categories, isSuccess, setCategories]);
+
+  useEffect(() => {
+    if (shouldRefetchCategories) {
+      refetch();
+      setShouldRefetchCategories(false);
+    }
+  }, [shouldRefetchCategories, setShouldRefetchCategories, refetch]);
 
   return (
     <div className="flex flex-col gap-2">
@@ -76,7 +91,7 @@ const AuthenticatedUserPageContent: FC<AuthenticatedUserPageContentProps> = ({ u
           <FeedListFilters categories={categories} username="Me" />
         </div>
       ) : null}
-      <InfiniteUserFeed userId={userId} />
+      <InfiniteUserFeed userId={userId} viewerId={userId} />
     </div>
   );
 };

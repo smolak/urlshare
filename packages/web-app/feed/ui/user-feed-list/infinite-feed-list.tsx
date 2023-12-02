@@ -1,3 +1,4 @@
+import { User } from "@prisma/client";
 import { FC, useEffect, useRef } from "react";
 
 import { FeedVM } from "../../models/feed.vm";
@@ -9,9 +10,16 @@ export interface InfiniteFeedListProps {
   loadMore: () => void;
   shouldLoadMore?: boolean;
   isFetching?: boolean;
+  viewerId?: User["id"];
 }
 
-export const InfiniteFeedList: FC<InfiniteFeedListProps> = ({ feed, loadMore, isFetching, shouldLoadMore }) => {
+export const InfiniteFeedList: FC<InfiniteFeedListProps> = ({
+  feed,
+  viewerId,
+  loadMore,
+  isFetching,
+  shouldLoadMore,
+}) => {
   const observerTarget = useRef(null);
 
   useEffect(() => {
@@ -38,7 +46,7 @@ export const InfiniteFeedList: FC<InfiniteFeedListProps> = ({ feed, loadMore, is
 
   return (
     <>
-      <FeedList feed={feed} />
+      <FeedList feed={feed} viewerId={viewerId} />
       {isFetching && <LoadingFeed />}
       <div ref={observerTarget} />
     </>

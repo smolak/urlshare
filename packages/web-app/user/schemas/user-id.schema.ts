@@ -3,6 +3,8 @@ import z from "zod";
 
 import { USER_ID_PREFIX } from "../utils/generate-user-id";
 
+export type UserId = z.infer<typeof userIdSchema>;
+
 export const userIdSchema = z
   .string()
   .trim()

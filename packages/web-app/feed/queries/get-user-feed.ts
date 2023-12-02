@@ -8,6 +8,7 @@ export type RawFeedEntry = {
   feed_id: Feed["id"];
   feed_createdAt: Feed["createdAt"];
   feed_liked: Feed["liked"];
+  user_userId: UserProfileData["userId"];
   user_username: UserProfileData["username"];
   user_image: User["image"];
   url_url: Url["url"];
@@ -25,7 +26,8 @@ type GetUserFeedQueryOptions = {
 };
 
 const baseQuery = Prisma.sql`
-      SELECT UserProfileData.username AS user_username, UserProfileData.image AS user_image,
+      SELECT
+        UserProfileData.username AS user_username, UserProfileData.image AS user_image, UserProfileData.userId as user_userId,
         Feed.id AS feed_id, Feed.createdAt AS feed_createdAt, Feed.liked as feed_liked,
         Url.url AS url_url, Url.metadata AS url_metadata,
         UserUrl.id AS userUrl_id, UserUrl.likes as url_likes,

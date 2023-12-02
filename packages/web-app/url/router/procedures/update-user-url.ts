@@ -2,16 +2,16 @@ import { TRPCError } from "@trpc/server";
 
 import { CategoryId } from "../../../category/schemas/category-id.schema";
 import { protectedProcedure } from "../../../trpc/server";
-import { updateUrlSchema } from "./update-url.schema";
+import { updateUserUrlSchema } from "./update-user-url.schema";
 import { selectCategoryIdsForUpdate } from "./utils/select-category-ids-for-update";
 
 type UpdateUrlResult = boolean;
 
-export const updateUrl = protectedProcedure
-  .input(updateUrlSchema)
+export const updateUserUrl = protectedProcedure
+  .input(updateUserUrlSchema)
   .mutation<UpdateUrlResult>(
     async ({ input: { userUrlId, categoryIds }, ctx: { requestId, logger, session, prisma } }) => {
-      const path = `url.${updateUrl.name}`;
+      const path = `url.${updateUserUrl.name}`;
       const userId = session.user.id;
 
       const userUrl = await prisma.userUrl.findFirst({
