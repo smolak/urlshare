@@ -1,3 +1,5 @@
+// Most of this improved over time thanks to create.t3.gg source code
+
 import { initTRPC, TRPCError } from "@trpc/server";
 import { type CreateNextContextOptions } from "@trpc/server/src/adapters/next";
 import { prisma } from "@urlshare/db/prisma/client";
@@ -5,6 +7,7 @@ import { logger } from "@urlshare/logger";
 import { generateRequestId } from "@urlshare/request-id/utils/generate-request-id";
 import { type Session } from "next-auth";
 import superjson from "superjson";
+import { ZodError } from "zod";
 
 import { getServerAuthSession } from "../auth/api/next-auth-options";
 
@@ -34,13 +37,19 @@ export const createTRPCContext = async (opts: CreateNextContextOptions) => {
 
 const t = initTRPC.context<typeof createTRPCContext>().create({
   transformer: superjson,
-  errorFormatter({ shape }) {
-    return shape;
+  errorFormatter({ shape, error }) {
+    return {
+      ...shape,
+      data: {
+        ...shape.data,
+        zodError: error.cause instanceof ZodError ? error.cause.flatten() : null,
+      },
+    };
   },
 });
 
 const isAuthenticated = t.middleware(({ next, ctx, path }) => {
-  if (!ctx.session || !ctx.session.user) {
+  if (!ctx?.session?.user) {
     ctx.logger.warn({ requestId: ctx.requestId, path }, "Not logged in.");
 
     throw new TRPCError({ code: "UNAUTHORIZED" });
