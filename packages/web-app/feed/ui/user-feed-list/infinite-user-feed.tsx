@@ -1,5 +1,6 @@
 import { User } from "@prisma/client";
 import { InfiniteData } from "@tanstack/react-query";
+import { generateId } from "@urlshare/shared/utils/generate-id";
 import { useSearchParams } from "next/navigation";
 import qs from "qs";
 import { FC } from "react";
@@ -72,6 +73,7 @@ export const InfiniteUserFeed: FC<InfiniteUserFeedProps> = ({ userId, from, view
       shouldLoadMore={shouldLoadMore}
       isFetching={isFetchingNextPage}
       viewerId={viewerId}
+      key={generateId()}
     />
   );
 };
