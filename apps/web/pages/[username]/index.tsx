@@ -38,6 +38,7 @@ type UserProfilePageProps =
       feed: ReadonlyArray<FeedVM>;
       categories: ReadonlyArray<CategoryVM>;
       itemsPerPage: number;
+      hash: string;
     }
   | {
       userData: null;
@@ -48,7 +49,7 @@ type UserProfilePageProps =
 
 const UserProfilePage: NextPage<UserProfilePageProps> = (props) => {
   if (props.userData) {
-    const { self, userData, feed, itemsPerPage, categories } = props;
+    const { self, userData, feed, itemsPerPage, categories, hash } = props;
     const maybeUserId = self?.id;
     const iAmLoggedIn = Boolean(maybeUserId);
     const myProfile = Boolean(maybeUserId === userData.id);
@@ -68,7 +69,7 @@ const UserProfilePage: NextPage<UserProfilePageProps> = (props) => {
               <FeedListFilters categories={categories} username={myProfile ? "Me" : userData.username} />
               {feed.length > 0 ? (
                 <>
-                  <FeedList feed={feed} viewerId={maybeUserId} />
+                  <FeedList feed={feed} viewerId={maybeUserId} key={hash} />
                   {feed.length === itemsPerPage && (
                     <InfiniteUserFeed
                       viewerId={maybeUserId}
@@ -177,5 +178,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res, query }
     createdAt: createdAt?.toISOString(),
   };
 
-  return { props: { userData: serializedUserData, feed, self, itemsPerPage, categories } };
+  const hash = filteredCategoryIds.sort().join(",");
+
+  return { props: { userData: serializedUserData, feed, self, itemsPerPage, categories, hash } };
 };
