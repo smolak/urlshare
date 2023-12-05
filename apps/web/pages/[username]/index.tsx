@@ -1,5 +1,6 @@
 import { prisma } from "@urlshare/db/prisma/client";
 import { createPossessiveForm } from "@urlshare/shared/utils/create-possessive-form";
+import { generateId } from "@urlshare/shared/utils/generate-id";
 import { CategoryVM, toCategoryVM } from "@urlshare/web-app/category/models/category.vm";
 import { getCategoryIdsFromSearchQuery } from "@urlshare/web-app/category/utils/get-category-ids-from-search-query";
 import { FeedVM, toFeedVM } from "@urlshare/web-app/feed/models/feed.vm";
@@ -178,7 +179,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res, query }
     createdAt: createdAt?.toISOString(),
   };
 
-  const hash = filteredCategoryIds.sort().join(",");
+  const hash = generateId();
 
   return { props: { userData: serializedUserData, feed, self, itemsPerPage, categories, hash } };
 };
