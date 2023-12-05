@@ -23,34 +23,40 @@ type Self = {
   id: string;
 } | null;
 
+type UserData = {
+  id: string;
+  username: string;
+  image: string;
+  followers: number;
+  following: number;
+  likes: number;
+  createdAt: string;
+  urlsCount: number;
+};
+
 type UserProfilePageProps =
   | {
-      self: Self;
-      userData: {
-        id: string;
-        username: string;
-        image: string;
-        followers: number;
-        following: number;
-        likes: number;
-        createdAt: string;
-        urlsCount: number;
+      error: null;
+      data: {
+        self: Self;
+        userData: UserData;
+        feed: ReadonlyArray<FeedVM>;
+        categories: ReadonlyArray<CategoryVM>;
+        itemsPerPage: number;
+        hash: string;
       };
-      feed: ReadonlyArray<FeedVM>;
-      categories: ReadonlyArray<CategoryVM>;
-      itemsPerPage: number;
-      hash: string;
     }
   | {
-      userData: null;
-      feed: null;
-      error: string;
-      errorCode: number;
+      error: {
+        message: string;
+        code: number;
+      };
+      data: null;
     };
 
 const UserProfilePage: NextPage<UserProfilePageProps> = (props) => {
-  if (props.userData) {
-    const { self, userData, feed, itemsPerPage, categories, hash } = props;
+  if (!props.error) {
+    const { self, userData, feed, itemsPerPage, categories, hash } = props.data;
     const maybeUserId = self?.id;
     const iAmLoggedIn = Boolean(maybeUserId);
     const myProfile = Boolean(maybeUserId === userData.id);
@@ -105,7 +111,7 @@ const UserProfilePage: NextPage<UserProfilePageProps> = (props) => {
 
 export default UserProfilePage;
 
-export const getServerSideProps: GetServerSideProps = async ({ req, res, query }) => {
+export const getServerSideProps: GetServerSideProps<UserProfilePageProps> = async ({ req, res, query }) => {
   const username = query.username;
   const parsingResult = usernameSchema.safeParse(username);
 
@@ -113,16 +119,9 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res, query }
     res.statusCode = StatusCodes.NOT_FOUND;
 
     return {
-      props: { error: parsingResult.error.message, errorCode: StatusCodes.NOT_FOUND, userData: null, urls: null },
+      props: { error: { message: parsingResult.error.message, code: StatusCodes.NOT_FOUND }, data: null },
     };
   }
-
-  const token = await getToken({ req });
-  const self = token
-    ? {
-        id: token.sub as string,
-      }
-    : null;
 
   const maybePublicUserData = await prisma.userProfileData.findUnique({
     where: {
@@ -139,13 +138,21 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res, query }
 
     return {
       props: {
-        error: `User with username: '${parsingResult.data}' not found.`,
-        errorCode: StatusCodes.NOT_FOUND,
-        userData: null,
-        feed: null,
+        error: {
+          message: `User with username: '${parsingResult.data}' not found.`,
+          code: StatusCodes.NOT_FOUND,
+        },
+        data: null,
       },
     };
   }
+
+  const token = await getToken({ req });
+  const self = token
+    ? {
+        id: token.sub as string,
+      }
+    : null;
 
   const feedSource = feedSourceSchema.parse(query.source);
   const categoryIds = getCategoryIdsFromSearchQuery(query.categories);
@@ -181,5 +188,17 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res, query }
 
   const hash = generateId();
 
-  return { props: { userData: serializedUserData, feed, self, itemsPerPage, categories, hash } };
+  return {
+    props: {
+      data: {
+        userData: serializedUserData,
+        feed,
+        self,
+        itemsPerPage,
+        categories,
+        hash,
+      },
+      error: null,
+    },
+  };
 };

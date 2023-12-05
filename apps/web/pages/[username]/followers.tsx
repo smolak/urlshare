@@ -13,29 +13,33 @@ type ViewerId = User["id"] | null;
 
 type FollowersPageProps =
   | {
-      viewerId: ViewerId;
-      userData: {
-        id: string;
-        username: string;
-        image: string;
-        followers: number;
-        following: number;
-        likes: number;
-        createdAt: string;
-        urlsCount: number;
+      data: {
+        viewerId: ViewerId;
+        userData: {
+          id: string;
+          username: string;
+          image: string;
+          followers: number;
+          following: number;
+          likes: number;
+          createdAt: string;
+          urlsCount: number;
+        };
+        profiles: FollowersRawEntries;
       };
-      profiles: FollowersRawEntries;
+      error: null;
     }
   | {
-      userData: null;
-      feed: null;
-      error: string;
-      errorCode: number;
+      data: null;
+      error: {
+        message: string;
+        code: number;
+      };
     };
 
 const FollowersPage: NextPage<FollowersPageProps> = (props) => {
-  if (props.userData) {
-    const { viewerId, userData, profiles } = props;
+  if (!props.error) {
+    const { viewerId, userData, profiles } = props.data;
     const canFollow = viewerId !== null && viewerId !== userData.id;
     const myProfile = userData.id === viewerId;
 
@@ -60,14 +64,14 @@ const FollowersPage: NextPage<FollowersPageProps> = (props) => {
 
 export default FollowersPage;
 
-export const getServerSideProps: GetServerSideProps = async ({ req, res, query }) => {
+export const getServerSideProps: GetServerSideProps<FollowersPageProps> = async ({ req, res, query }) => {
   const parsingResult = usernameSchema.safeParse(query.username);
 
   if (!parsingResult.success) {
     res.statusCode = StatusCodes.NOT_FOUND;
 
     return {
-      props: { error: parsingResult.error.message, errorCode: StatusCodes.NOT_FOUND, userData: null, urls: null },
+      props: { error: { message: parsingResult.error.message, code: StatusCodes.NOT_FOUND }, data: null },
     };
   }
 
@@ -90,10 +94,8 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res, query }
 
     return {
       props: {
-        error: `User with username: '${parsingResult.data}' not found.`,
-        errorCode: StatusCodes.NOT_FOUND,
-        userData: null,
-        feed: null,
+        error: { message: `User with username: '${parsingResult.data}' not found.`, code: StatusCodes.NOT_FOUND },
+        data: null,
       },
     };
   }
@@ -107,5 +109,5 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res, query }
 
   const followers = await getFollowersQuery(maybePublicUserData.userId, viewerId);
 
-  return { props: { userData: serializedUserData, profiles: followers, viewerId } };
+  return { props: { data: { userData: serializedUserData, profiles: followers, viewerId }, error: null } };
 };
