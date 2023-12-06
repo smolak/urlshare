@@ -1,8 +1,22 @@
-import { UserUrl } from "@prisma/client";
-import { Category } from "@urlshare/db/prisma/client";
+import { User, UserUrl } from "@prisma/client";
+import { Category, Prisma } from "@urlshare/db/prisma/client";
 import { TransactionPrismaClient } from "@urlshare/db/prisma/types";
 
 type CategoryIds = Category["id"][];
+
+export const createFindManyCategoriesArgs = (userId: User["id"]): Prisma.CategoryFindManyArgs => ({
+  select: {
+    id: true,
+    name: true,
+    urlsCount: true,
+  },
+  where: {
+    userId,
+  },
+  orderBy: {
+    name: "asc",
+  },
+});
 
 export const incrementUrlsCount = async (
   tx: TransactionPrismaClient,

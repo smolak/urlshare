@@ -1,4 +1,5 @@
 import { publicProcedure } from "../../../trpc/server";
+import { createFindManyCategoriesArgs } from "../../prisma/operations";
 import { getUserCategoriesSchema } from "./get-user-categories.schema";
 
 export const getUserCategories = publicProcedure
@@ -8,19 +9,7 @@ export const getUserCategories = publicProcedure
 
     logger.info({ requestId, path, userId }, "Fetching user's categories.");
 
-    const categories = await prisma.category.findMany({
-      select: {
-        id: true,
-        name: true,
-        urlsCount: true,
-      },
-      where: {
-        userId,
-      },
-      orderBy: {
-        name: "asc",
-      },
-    });
+    const categories = await prisma.category.findMany(createFindManyCategoriesArgs(userId));
 
     logger.info({ requestId, path, userId }, "User's categories fetched.");
 

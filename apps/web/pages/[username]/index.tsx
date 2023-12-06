@@ -2,6 +2,7 @@ import { prisma } from "@urlshare/db/prisma/client";
 import { createPossessiveForm } from "@urlshare/shared/utils/create-possessive-form";
 import { generateId } from "@urlshare/shared/utils/generate-id";
 import { CategoryVM, toCategoryVM } from "@urlshare/web-app/category/models/category.vm";
+import { createFindManyCategoriesArgs } from "@urlshare/web-app/category/prisma/operations";
 import { getCategoryIdsFromSearchQuery } from "@urlshare/web-app/category/utils/get-category-ids-from-search-query";
 import { FeedVM, toFeedVM } from "@urlshare/web-app/feed/models/feed.vm";
 import { getUserFeedQuery } from "@urlshare/web-app/feed/queries/get-user-feed";
@@ -159,19 +160,7 @@ export const getServerSideProps: GetServerSideProps<UserProfilePageProps> = asyn
   const itemsPerPage = getConfig().serverRuntimeConfig.userFeedList.itemsPerPage;
 
   const categories = await prisma.category
-    .findMany({
-      select: {
-        id: true,
-        name: true,
-        urlsCount: true,
-      },
-      where: {
-        userId: maybePublicUserData.userId,
-      },
-      orderBy: {
-        name: "asc",
-      },
-    })
+    .findMany(createFindManyCategoriesArgs(maybePublicUserData.userId))
     .then((categories) => {
       return categories.map(toCategoryVM);
     });
