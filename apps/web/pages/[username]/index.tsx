@@ -160,8 +160,16 @@ export const getServerSideProps: GetServerSideProps<UserProfilePageProps> = asyn
 
   const categories = await prisma.category
     .findMany({
+      select: {
+        id: true,
+        name: true,
+        urlsCount: true,
+      },
       where: {
         userId: maybePublicUserData.userId,
+      },
+      orderBy: {
+        name: "asc",
       },
     })
     .then((categories) => {
