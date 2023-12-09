@@ -7,7 +7,7 @@ import { FC, useCallback, useState } from "react";
 
 import { FeedVM } from "../../models/feed.vm";
 import { DropdownOptions } from "./dropdown-options";
-import { EditFeedItemModal, type OnSuccess } from "./edit-feed-item-modal";
+import { EditFeedItemModal, OnSuccess } from "./edit-feed-item-modal";
 import { FeedListItem } from "./feed-list-item";
 import { NotLikedIcon, ToggleLikeUrl } from "./toggle-like-url";
 
