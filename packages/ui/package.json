@@ -26,7 +26,7 @@
     "tailwind-merge": "^2.1.0"
   },
   "peerDependencies": {
-    "next": "^14.0.3",
+    "next": "^14.0.4",
     "react-hook-form": "^7.48.2"
   }
 }

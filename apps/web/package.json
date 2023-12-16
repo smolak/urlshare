@@ -20,7 +20,7 @@
     "@urlshare/shared": "*",
     "@urlshare/ui": "*",
     "@urlshare/web-app": "*",
-    "next": "^14.0.3",
+    "next": "^14.0.4",
     "nextjs-cors": "^2.1.2",
     "qs": "^6.11.2",
     "react": "18.2.0",
