@@ -15,8 +15,8 @@
     "react-dom": "18.2.0"
   },
   "devDependencies": {
-    "@types/react": "^18.2.42",
-    "@types/react-dom": "^18.2.17",
+    "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.18",
     "@urlshare/eslint-config": "*",
     "@urlshare/tailwind-config": "*",
     "@urlshare/tsconfig": "*"
