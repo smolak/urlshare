@@ -2,18 +2,19 @@
   "$schema": "https://turbo.build/schema.json",
   "globalDependencies": ["**/.env.*local"],
   "globalEnv": [
-    "NODE_ENV",
-    "LOG_LEVEL",
-    "PORT",
-    "VERCEL_URL",
+    "CLOUDINARY_URL",
+    "FACEBOOK_CLIENT_ID",
+    "FACEBOOK_CLIENT_SECRET",
+    "FEED_QUEUE_API_KEY",
     "GITHUB_ID",
     "GITHUB_SECRET",
     "GOOGLE_CLIENT_ID",
     "GOOGLE_CLIENT_SECRET",
-    "FACEBOOK_CLIENT_ID",
-    "FACEBOOK_CLIENT_SECRET",
-    "FEED_QUEUE_API_KEY",
-    "URL_QUEUE_API_KEY"
+    "LOG_LEVEL",
+    "NODE_ENV",
+    "PORT",
+    "URL_QUEUE_API_KEY",
+    "VERCEL_URL"
   ],
   "pipeline": {
     "build": {
