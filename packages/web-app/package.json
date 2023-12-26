@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@urlshare/auth": "*",
+    "@urlshare/cdn": "*",
     "@urlshare/logger": "*",
     "@urlshare/rss": "*",
     "@urlshare/shared": "*",

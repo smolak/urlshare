@@ -1,5 +1,5 @@
 {
-  "name": "cdn",
+  "name": "@urlshare/cdn",
   "version": "0.0.0",
   "private": true,
   "scripts": {

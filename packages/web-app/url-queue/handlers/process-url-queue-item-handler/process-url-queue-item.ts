@@ -1,10 +1,11 @@
 import { UserUrl } from "@prisma/client";
+import { UploadImageFromUrl } from "@urlshare/cdn/utils/upload-image-from-url";
 import { sha1 } from "@urlshare/crypto/sha1";
 import { Prisma, prisma, Url, UrlQueue, UrlQueueStatus } from "@urlshare/db/prisma/client";
 import { ID_PLACEHOLDER_REPLACED_BY_ID_GENERATOR } from "@urlshare/db/prisma/middlewares/generate-model-id";
 import { TransactionPrismaClient } from "@urlshare/db/prisma/types";
 import { Logger } from "@urlshare/logger";
-import { compressMetadata } from "@urlshare/metadata/compression";
+import { CompressedMetadata, compressMetadata, decompressMetadata } from "@urlshare/metadata/compression";
 import { FetchMetadata } from "@urlshare/metadata/fetch-metadata";
 import { Metadata } from "@urlshare/metadata/types";
 
@@ -15,6 +16,7 @@ interface Params {
   logger: Logger;
   requestId: string;
   maxNumberOfAttempts: number;
+  uploadImageFromUrl: UploadImageFromUrl;
 }
 
 type NoItemsInQueue = null;
@@ -25,8 +27,9 @@ export const actionType = "processUrlQueueItemHandler";
 export const processUrlQueueItem: ProcessUrlQueueItem = async ({
   fetchMetadata,
   logger,
-  requestId,
   maxNumberOfAttempts,
+  requestId,
+  uploadImageFromUrl,
 }) => {
   const urlQueueItem = await prisma.urlQueue.findFirst({
     select: {
@@ -70,7 +73,7 @@ export const processUrlQueueItem: ProcessUrlQueueItem = async ({
 
   logger.info({ requestId, actionType, metadata }, "Metadata fetched.");
 
-  const urlEntry: Url = await getOrCreateUrl({ metadata, rawUrl: urlQueueItem.rawUrl });
+  const { urlEntry, status } = await getOrCreateUrl({ metadata, rawUrl: urlQueueItem.rawUrl });
 
   const urlId = urlEntry.id;
   const userId = urlQueueItem.userId;
@@ -78,6 +81,10 @@ export const processUrlQueueItem: ProcessUrlQueueItem = async ({
 
   await prisma.$transaction(async (tx) => {
     const { id: userUrlId } = await createUserUrl(tx, { userId, urlId });
+
+    if (status === "new") {
+      await uploadImagesToCdn(tx, urlEntry, uploadImageFromUrl);
+    }
 
     if (categoryIds.length > 0) {
       await attachCategoriesToUrl(tx, { userId, userUrlId, categoryIds });
@@ -147,6 +154,51 @@ const createUserUrl = async (
       urlId,
     },
   });
+};
+
+const uploadImagesToCdn = async (
+  prisma: TransactionPrismaClient,
+  urlEntry: Url,
+  uploadImageFromUrl: UploadImageFromUrl
+) => {
+  const currentMetadata = decompressMetadata(urlEntry.metadata as CompressedMetadata);
+
+  let imageCdnUrl;
+  let iconCdnUrl;
+  let shouldUpdateMetadata = false;
+
+  // TODO: possible improvement with Promise.all / Promise.allSettled
+  // both in terms of speed and, if settled, error handling
+
+  if (currentMetadata.image) {
+    const imageFilename = `url/image-${urlEntry.id}`;
+    imageCdnUrl = await uploadImageFromUrl(currentMetadata.image, imageFilename);
+    shouldUpdateMetadata = true;
+  }
+
+  if (currentMetadata.icon) {
+    const iconFilename = `url/icon-${urlEntry.id}`;
+    iconCdnUrl = await uploadImageFromUrl(currentMetadata.icon, iconFilename);
+    shouldUpdateMetadata = true;
+  }
+
+  if (shouldUpdateMetadata) {
+    const currentMetadata = decompressMetadata(urlEntry.metadata as CompressedMetadata);
+    const newMetadata: CompressedMetadata = compressMetadata({
+      ...currentMetadata,
+      imageCdn: imageCdnUrl,
+      iconCdn: iconCdnUrl,
+    });
+
+    await prisma.url.update({
+      data: {
+        metadata: newMetadata as Prisma.JsonObject,
+      },
+      where: {
+        id: urlEntry.id,
+      },
+    });
+  }
 };
 
 const attachCategoriesToUrl = async (
@@ -243,7 +295,13 @@ const markUrlQueueAsAccepted = async (
   });
 };
 
-const getOrCreateUrl = async ({ rawUrl, metadata }: { rawUrl: UrlQueue["rawUrl"]; metadata: Metadata }) => {
+const getOrCreateUrl = async ({
+  rawUrl,
+  metadata,
+}: {
+  rawUrl: UrlQueue["rawUrl"];
+  metadata: Metadata;
+}): Promise<{ urlEntry: Url; status: "existing" | "new" }> => {
   const url = metadata.url || rawUrl;
   const urlHash = sha1(url);
   const compressedMetadata = compressMetadata(metadata);
@@ -253,10 +311,13 @@ const getOrCreateUrl = async ({ rawUrl, metadata }: { rawUrl: UrlQueue["rawUrl"]
   });
 
   if (urlEntry) {
-    return urlEntry;
+    return {
+      urlEntry,
+      status: "existing",
+    };
   }
 
-  return prisma.url.create({
+  const newUrlEntry = await prisma.url.create({
     data: {
       id: ID_PLACEHOLDER_REPLACED_BY_ID_GENERATOR,
       url,
@@ -264,4 +325,9 @@ const getOrCreateUrl = async ({ rawUrl, metadata }: { rawUrl: UrlQueue["rawUrl"]
       metadata: compressedMetadata as Prisma.JsonObject,
     },
   });
+
+  return {
+    urlEntry: newUrlEntry,
+    status: "new",
+  };
 };

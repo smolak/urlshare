@@ -1,5 +1,6 @@
 import { authorizationHeaderSchema } from "@urlshare/auth/schemas/authorization-header.schema";
 import { getAuthToken } from "@urlshare/auth/utils/get-auth-token";
+import { UploadImageFromUrl } from "@urlshare/cdn/utils/upload-image-from-url";
 import { Logger } from "@urlshare/logger";
 import { FetchMetadata } from "@urlshare/metadata/fetch-metadata";
 import { generateRequestId } from "@urlshare/request-id/utils/generate-request-id";
@@ -9,11 +10,12 @@ import getConfig from "next/config";
 import { ProcessUrlQueueItemHandler } from "./index";
 import { actionType, processUrlQueueItem } from "./process-url-queue-item";
 
-interface Params {
+export type Params = {
   fetchMetadata: FetchMetadata;
   logger: Logger;
   maxNumberOfAttempts: number;
-}
+  uploadImageFromUrl: UploadImageFromUrl;
+};
 
 export type ProcessUrlQueueItemHandlerFactory = (params: Params) => ProcessUrlQueueItemHandler;
 
@@ -21,6 +23,7 @@ export const processUrlQueueItemHandlerFactory: ProcessUrlQueueItemHandlerFactor
   fetchMetadata,
   logger,
   maxNumberOfAttempts,
+  uploadImageFromUrl,
 }) => {
   return async (req, res) => {
     const requestId = generateRequestId();
@@ -48,7 +51,13 @@ export const processUrlQueueItemHandlerFactory: ProcessUrlQueueItemHandlerFactor
     }
 
     try {
-      const urlEntryCreated = await processUrlQueueItem({ fetchMetadata, logger, requestId, maxNumberOfAttempts });
+      const urlEntryCreated = await processUrlQueueItem({
+        fetchMetadata,
+        logger,
+        maxNumberOfAttempts,
+        requestId,
+        uploadImageFromUrl,
+      });
 
       if (urlEntryCreated === null) {
         logger.info({ requestId, actionType }, "Queue is empty.");

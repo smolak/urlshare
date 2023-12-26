@@ -1,3 +1,4 @@
+import { uploadImageFromUrl } from "@urlshare/cdn/utils/upload-image-from-url";
 import { Url } from "@urlshare/db/prisma/client";
 import { logger } from "@urlshare/logger";
 import { fetchMetadata } from "@urlshare/metadata/fetch-metadata";
@@ -20,4 +21,5 @@ export const processUrlQueueItemHandler: ProcessUrlQueueItemHandler = processUrl
   fetchMetadata,
   logger,
   maxNumberOfAttempts: MAX_NUMBER_OF_ATTEMPTS,
+  uploadImageFromUrl,
 });

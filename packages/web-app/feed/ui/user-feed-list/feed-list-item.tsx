@@ -1,3 +1,4 @@
+import { createCdnImageUrl } from "@urlshare/cdn/utils/create-cdn-image-url";
 import { isImage, isWebsite } from "@urlshare/metadata/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@urlshare/ui/design-system/ui/avatar";
 import { Button } from "@urlshare/ui/design-system/ui/button";
@@ -29,6 +30,16 @@ export const FeedListItem: FC<FeedListItemProps> = ({ feedItem, interactions, op
   const isAnImage = isImage(url.metadata);
   const isAWebsite = isWebsite(url.metadata);
   const isSomethingElse = !isAnImage && !isAWebsite;
+
+  let imageUrl;
+
+  if (url.metadata.imageCdn || url.metadata.image) {
+    if (url.metadata.imageCdn) {
+      imageUrl = createCdnImageUrl(url.metadata.imageCdn);
+    } else {
+      imageUrl = url.metadata.image;
+    }
+  }
 
   return (
     <Card className="overflow-hidden shadow hover:shadow-lg">
@@ -71,7 +82,7 @@ export const FeedListItem: FC<FeedListItemProps> = ({ feedItem, interactions, op
         ) : null}
       </CardHeader>
       <CardContent className="flex flex-col gap-5">
-        {url.metadata.image && (
+        {imageUrl && (
           <figure>
             <a
               href={url.url}
@@ -79,7 +90,7 @@ export const FeedListItem: FC<FeedListItemProps> = ({ feedItem, interactions, op
               target="_blank"
               className="flex max-h-80 place-content-center overflow-hidden rounded rounded-md"
             >
-              <img src={url.metadata.image} alt={url.metadata.title} className="object-cover" />
+              <img src={imageUrl} alt={url.metadata.title} className="object-cover" />
             </a>
           </figure>
         )}

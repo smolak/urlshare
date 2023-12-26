@@ -12,7 +12,9 @@ describe("compressMetadata", () => {
       email: "email",
       facebook: "facebook",
       icon: "icon",
+      iconCdn: "iconCdn",
       image: "image",
+      imageCdn: "imageCdn",
       keywords: ["keywords"],
       language: "language",
       modified: "modified",
@@ -51,6 +53,8 @@ describe("compressMetadata", () => {
       s: "url",
       t: "video",
       u: "text/html; charset=utf-8",
+      v: "iconCdn",
+      w: "imageCdn",
     });
   });
 
@@ -97,6 +101,8 @@ describe("decompress", () => {
       s: "url",
       t: "video",
       u: "text/html; charset=utf-8",
+      v: "iconCdn",
+      w: "imageCdn",
     };
 
     const metadata = decompressMetadata(compressedMetadata);
@@ -110,7 +116,9 @@ describe("decompress", () => {
       email: "email",
       facebook: "facebook",
       icon: "icon",
+      iconCdn: "iconCdn",
       image: "image",
+      imageCdn: "imageCdn",
       keywords: ["keywords"],
       language: "language",
       modified: "modified",

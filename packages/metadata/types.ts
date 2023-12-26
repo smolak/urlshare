@@ -7,7 +7,9 @@ export type Metadata = {
   email?: string;
   facebook?: string;
   icon?: string;
+  iconCdn?: string;
   image?: string;
+  imageCdn?: string;
   keywords?: ReadonlyArray<string>;
   language?: string;
   modified?: string;

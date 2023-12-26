@@ -43,6 +43,10 @@ export interface CompressedMetadata {
   t?: string;
   // contentType?: string;
   u?: string;
+  // iconCdn?: string;
+  v?: string;
+  // imageCdn?: string;
+  w?: string;
 }
 
 export const compressMapper: Record<keyof Metadata, keyof CompressedMetadata> = {
@@ -67,6 +71,8 @@ export const compressMapper: Record<keyof Metadata, keyof CompressedMetadata> = 
   url: "s",
   video: "t",
   contentType: "u",
+  iconCdn: "v",
+  imageCdn: "w",
 };
 
 const decompressMapper = Object.entries(compressMapper).reduce(
